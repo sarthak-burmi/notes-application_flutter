@@ -5,6 +5,7 @@ import 'package:notes_app_solulab/model/notesModel.dart';
 
 class NoteProvider with ChangeNotifier {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
+  User? _user;
   final User user;
   List<Note> _notes = [];
   bool _isLoading = false;
@@ -13,12 +14,21 @@ class NoteProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
 
   NoteProvider(this.user) {
-    fetchNotes();
+    if (_user != null) {
+      fetchNotes();
+    }
+  }
+  void setUser(User user) {
+    _user = user;
+    _notes.clear(); // Clear notes when setting a new user
+    if (_user != null) {
+      fetchNotes();
+    }
   }
 
   Future<void> fetchNotes() async {
     _isLoading = true;
-    notifyListeners(); // Notify listeners to show loading indicator
+    notifyListeners();
     try {
       final snapshot = await _db
           .collection('notes')

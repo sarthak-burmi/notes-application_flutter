@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:notes_app_solulab/autherntication/CreateAccout.dart';
 import 'package:notes_app_solulab/constants/colors.dart';
+import 'package:notes_app_solulab/screens/notes_list.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -14,43 +15,54 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  bool _isLoading = false;
 
   Future<void> _login() async {
+    setState(() {
+      _isLoading = true;
+    });
     try {
       await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: _emailController.text.trim(),
-        password: _passwordController.text,
+        password: _passwordController.text.trim(),
+      );
+      print('Login successful');
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (context) => NoteList(),
+        ),
       );
     } on FirebaseAuthException catch (e) {
+      String errorMessage;
       if (e.code == 'user-not-found') {
-        print('No user found for that email.');
+        errorMessage = 'No user found for that email.';
       } else if (e.code == 'wrong-password') {
-        print('Wrong password provided for that user.');
+        errorMessage = 'Wrong password provided for that user.';
       } else if (e.code == 'invalid-email') {
-        print('Invalid email address format.');
+        errorMessage = 'Invalid email address format.';
       } else {
-        print('Error: ${e.message}');
+        errorMessage = 'Error: ${e.message}';
       }
+      print('Login error: $errorMessage');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(errorMessage)),
+      );
     } catch (e) {
-      print('Error: $e');
+      print('Login error: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              mainColor,
-              Colors.white,
-            ],
-            stops: [0.0, 0.5],
-          ),
-        ),
+      body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(26, 50, 26, 0),
           child: Column(
@@ -93,50 +105,53 @@ class _LoginScreenState extends State<LoginScreen> {
                       ],
                     ),
                   ),
+                  Image.asset("assets/images/Login-rafiki (1).png"),
                   const SizedBox(height: 30),
-                  makeInput(label: 'Username', controller: _emailController),
+                  makeInput(label: 'Email', controller: _emailController),
                   const SizedBox(height: 10),
                   makeInput(
                       label: 'Password',
                       controller: _passwordController,
                       obscureText: true),
                   const SizedBox(height: 25),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: 350,
-                        height: 55,
-                        padding: const EdgeInsets.only(top: 3, left: 3),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(50),
-                          border: const Border(
-                            bottom: BorderSide(color: Colors.black),
-                            top: BorderSide(color: Colors.black),
-                            left: BorderSide(color: Colors.black),
-                            right: BorderSide(color: Colors.black),
-                          ),
+                  _isLoading
+                      ? const Center(child: CircularProgressIndicator())
+                      : Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              width: 350,
+                              height: 55,
+                              padding: const EdgeInsets.only(top: 3, left: 3),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(50),
+                                border: const Border(
+                                  bottom: BorderSide(color: Colors.black),
+                                  top: BorderSide(color: Colors.black),
+                                  left: BorderSide(color: Colors.black),
+                                  right: BorderSide(color: Colors.black),
+                                ),
+                              ),
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: mainColor,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(50),
+                                  ),
+                                ),
+                                onPressed: _login,
+                                child: Text(
+                                  "Login",
+                                  style: GoogleFonts.kanit(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            )
+                          ],
                         ),
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: mainColor,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(50),
-                            ),
-                          ),
-                          onPressed: _login,
-                          child: Text(
-                            "Login",
-                            style: GoogleFonts.kanit(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      )
-                    ],
-                  ),
                   const SizedBox(height: 25),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,

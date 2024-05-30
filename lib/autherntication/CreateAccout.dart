@@ -1,8 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:notes_app_solulab/autherntication/Login.dart';
 import 'package:notes_app_solulab/constants/colors.dart';
+import 'package:notes_app_solulab/screens/notes_list.dart';
 import 'package:notes_app_solulab/screens/sign_in_screen.dart';
 
 class CreatAccountScreen extends StatefulWidget {
@@ -21,6 +23,22 @@ class _CreatAccountScreen extends State<CreatAccountScreen> {
         email: _emailController.text.trim(),
         password: _passwordController.text,
       );
+
+      Fluttertoast.showToast(
+        msg: "Account Created\n Login with your account",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.green,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+
+      // Navigate to NotesList screen
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => NoteList()),
+      );
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
         print('The password provided is too weak.');
@@ -38,19 +56,10 @@ class _CreatAccountScreen extends State<CreatAccountScreen> {
 
   @override
   Widget build(BuildContext context) {
+    double width = MediaQuery.of(context).size.width;
+    double height = MediaQuery.of(context).size.height;
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              mainColor,
-              Colors.white,
-            ],
-            stops: [0.0, 0.5],
-          ),
-        ),
+      body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(26, 50, 26, 0),
           child: Column(
@@ -80,7 +89,7 @@ class _CreatAccountScreen extends State<CreatAccountScreen> {
                       ),
                       children: [
                         TextSpan(
-                          text: 'Welcome',
+                          text: 'Get Started with\n',
                           style: GoogleFonts.kanit(
                             fontWeight: FontWeight.bold,
                             fontSize: 40,
@@ -88,28 +97,28 @@ class _CreatAccountScreen extends State<CreatAccountScreen> {
                           ),
                         ),
                         TextSpan(
-                          text: ' Note Your',
+                          text: 'Notes',
                           style: GoogleFonts.kanit(
                             fontWeight: FontWeight.bold,
                             fontSize: 40,
                             color: mainColor,
                           ),
                         ),
-                        TextSpan(
-                          text: ' Things ',
-                          style: GoogleFonts.kanit(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 40,
-                            color: Colors.black,
-                          ),
-                        ),
                       ],
                     ),
                   ),
+                  Image.asset(
+                    "assets/images/Prototyping process-pana (1).png",
+                    height: height * 0.40,
+                  ),
                   const SizedBox(height: 30),
-                  makeInput(label: 'Username', controller: _emailController),
+                  makeInput(label: 'Email', controller: _emailController),
                   const SizedBox(height: 10),
-                  makeInput(label: 'Password', controller: _passwordController),
+                  makeInput(
+                      label: 'Password',
+                      controller: _passwordController,
+                      obscureText: true),
+
                   const SizedBox(height: 25),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -137,7 +146,7 @@ class _CreatAccountScreen extends State<CreatAccountScreen> {
                             _creataccount();
                           },
                           child: Text(
-                            "Login",
+                            "Create Account",
                             style: GoogleFonts.kanit(
                               fontWeight: FontWeight.bold,
                               fontSize: 18,

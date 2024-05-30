@@ -5,8 +5,6 @@ import 'package:notes_app_solulab/autherntication/Login.dart';
 import 'package:notes_app_solulab/provider/notes_provider.dart';
 import 'package:provider/provider.dart'; // Import Provider package
 import 'package:notes_app_solulab/screens/notes_list.dart';
-import 'package:notes_app_solulab/screens/sign_in_screen.dart';
-// Import your NoteProvider
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

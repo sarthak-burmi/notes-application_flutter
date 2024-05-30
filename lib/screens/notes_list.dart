@@ -2,12 +2,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/widgets.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:notes_app_solulab/autherntication/Login.dart';
 import 'package:notes_app_solulab/constants/colors.dart';
 import 'package:notes_app_solulab/constants/timeGreeting.dart';
 import 'package:provider/provider.dart';
 import 'package:notes_app_solulab/screens/notes_edit.dart';
 import 'package:notes_app_solulab/model/notesModel.dart';
-import 'package:animate_do/animate_do.dart';
 import 'package:intl/intl.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:notes_app_solulab/provider/notes_provider.dart';
@@ -58,7 +59,22 @@ class NoteList extends StatelessWidget {
                     const Spacer(),
                     IconButton(
                       onPressed: () {
-                        _buildLogoutButton();
+                        Fluttertoast.showToast(
+                          msg: "Logged Out",
+                          toastLength: Toast.LENGTH_SHORT,
+                          gravity: ToastGravity.BOTTOM,
+                          timeInSecForIosWeb: 1,
+                          backgroundColor: Colors.red,
+                          textColor: Colors.white,
+                          fontSize: 16.0,
+                        );
+                        FirebaseAuth.instance.signOut();
+                        Provider.of<NoteProvider>(context, listen: false)
+                            .fetchNotes();
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(
+                              builder: (context) => const LoginScreen()),
+                        );
                       },
                       icon: const Icon(
                         Icons.logout,
@@ -230,6 +246,7 @@ class NoteList extends StatelessWidget {
   Widget _buildAddNoteButton(
       BuildContext context, NoteProvider noteProvider, User user) {
     return FloatingActionButton(
+      backgroundColor: mainColor,
       onPressed: () => Navigator.push(
         context,
         MaterialPageRoute(
@@ -246,14 +263,29 @@ class NoteList extends StatelessWidget {
           ),
         ),
       ),
-      child: const Icon(Icons.add),
+      child: const Icon(
+        Icons.add,
+        color: Colors.white,
+      ),
     );
   }
 
   Widget _buildNotesList(NoteProvider noteProvider) {
     if (noteProvider.notes.isEmpty) {
       return Center(
-        child: Text('No notes available.'),
+        child: Column(
+          children: [
+            Image.asset(
+                "assets/images/Oops! 404 Error with a broken robot-rafiki.png"),
+            Text(
+              'No notes available.',
+              style: GoogleFonts.montserrat(
+                color: Colors.black,
+                fontSize: 30,
+              ),
+            ),
+          ],
+        ),
       );
     }
 
