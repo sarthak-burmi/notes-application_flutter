@@ -65,23 +65,15 @@ flutter run
 Usage
 
 Sign Up/Login:
-
 Upon launching the app, users will be prompted to sign up or log in using their email and password.
+
 Add a Note:
-
 Tap on the "+" button to add a new note. Enter the note content and tap "Save".
+
 Edit/Delete a Note:
-
 Tap on a note in the list to edit or delete it.
+
 Logout:
-
 Tap on the logout button to sign out from the app.
-Contributing
 
-Contributions are welcome! Please fork this repository and create a pull request with your proposed changes.
 
-License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-Feel free to customize this README to fit your specific application and project structure.
