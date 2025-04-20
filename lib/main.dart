@@ -1,54 +1,85 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:notes_app_solulab/autherntication/Login.dart';
-import 'package:notes_app_solulab/provider/notes_provider.dart';
-import 'package:provider/provider.dart'; // Import Provider package
+import 'package:notes_app_solulab/core/supaBase_client.dart';
+import 'package:notes_app_solulab/provider/auth_provider.dart';
 import 'package:notes_app_solulab/screens/notes_list.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  runApp(MyApp());
+
+  // Initialize Supabase
+  await SupabaseClientHelper.initialize();
+
+  runApp(
+    const ProviderScope(
+      child: MyApp(),
+    ),
+  );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   @override
-  Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(
-            create: (_) => NoteProvider(FirebaseAuth.instance.currentUser!)),
-      ],
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'Note Taking App',
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-        ),
-        home: AuthGate(),
+  Widget build(BuildContext context, WidgetRef ref) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Note Taking App',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        useMaterial3: true,
       ),
+      home: const AuthGate(),
     );
   }
 }
 
-class AuthGate extends StatelessWidget {
+class AuthGate extends ConsumerStatefulWidget {
+  const AuthGate({Key? key}) : super(key: key);
+
+  @override
+  ConsumerState<AuthGate> createState() => _AuthGateState();
+}
+
+class _AuthGateState extends ConsumerState<AuthGate> {
+  @override
+  void initState() {
+    super.initState();
+    // Check initial auth state on load
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final currentUser = SupabaseClientHelper.supabase.auth.currentUser;
+      print("AuthGate init - Current user: $currentUser");
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<User?>(
-      stream: FirebaseAuth.instance.authStateChanges(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Scaffold(body: Center(child: CircularProgressIndicator()));
-        } else if (snapshot.hasData) {
-          return ChangeNotifierProvider(
-            create: (_) => NoteProvider(snapshot.data!),
-            child: NoteList(),
-          );
-        } else {
-          return const LoginScreen();
-        }
-      },
-    );
+    // Watch the auth state to ensure it updates when auth changes
+    final authState = ref.watch(authStateProvider);
+
+    // Add debug information
+    print("Current auth state in AuthGate: $authState");
+
+    switch (authState) {
+      case AuthState.loading:
+        return const Scaffold(
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(height: 16),
+                Text("Loading authentication state..."),
+              ],
+            ),
+          ),
+        );
+      case AuthState.authenticated:
+        return const NoteList();
+      case AuthState.unauthenticated:
+      case AuthState.error:
+        return const LoginScreen();
+    }
   }
 }
