@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:notes_app_solulab/constants/colors.dart';
 import 'package:notes_app_solulab/model/notesModel.dart';
@@ -20,6 +21,7 @@ class _NoteEditState extends ConsumerState<NoteEdit>
   late TextEditingController _titleController;
   late TextEditingController _contentController;
   late bool _isCompleted;
+  late DateTime _selectedDate;
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
@@ -31,6 +33,9 @@ class _NoteEditState extends ConsumerState<NoteEdit>
     _titleController = TextEditingController(text: widget.note.title);
     _contentController = TextEditingController(text: widget.note.content);
     _isCompleted = widget.note.isCompleted;
+
+    // Parse the task date or use current date
+    _selectedDate = DateTime.tryParse(widget.note.taskDate) ?? DateTime.now();
 
     _animationController = AnimationController(
       vsync: this,
@@ -65,6 +70,39 @@ class _NoteEditState extends ConsumerState<NoteEdit>
     super.dispose();
   }
 
+  // Date selection method
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: mainColor,
+              onPrimary: Colors.white,
+              onSurface: Colors.black,
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: mainColor,
+              ),
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null && picked != _selectedDate) {
+      setState(() {
+        _selectedDate = picked;
+      });
+    }
+  }
+
   void _saveNote() async {
     final title = _titleController.text.trim();
     final content = _contentController.text.trim();
@@ -94,6 +132,7 @@ class _NoteEditState extends ConsumerState<NoteEdit>
       title: title,
       content: content,
       isCompleted: _isCompleted,
+      taskDate: _selectedDate.toIso8601String(), // Update task date
     );
 
     try {
@@ -140,247 +179,345 @@ class _NoteEditState extends ConsumerState<NoteEdit>
 
   @override
   Widget build(BuildContext context) {
-    double width = MediaQuery.of(context).size.width;
-    double height = MediaQuery.of(context).size.height;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Responsive sizing calculations
+        final maxWidth = constraints.maxWidth;
+        final maxHeight = constraints.maxHeight;
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        title: Text(
-          widget.note.id.isEmpty ? 'Add Task' : 'Edit Task',
-          style: GoogleFonts.montserrat(
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
-        ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
-        elevation: 0,
-        actions: [
-          if (!widget.note.id.isEmpty)
-            IconButton(
-              onPressed: () {
-                _confirmDelete(context);
-              },
-              icon: const Icon(
-                Icons.delete_outline_rounded,
-                color: Colors.red,
+        // Calculate responsive padding and spacing
+        double horizontalPadding =
+            maxWidth > 600 ? maxWidth * 0.1 : maxWidth * 0.05;
+        double verticalSpacing =
+            maxHeight > 800 ? maxHeight * 0.03 : maxHeight * 0.02;
+
+        // Responsive image height
+        double imageHeight =
+            maxHeight > 800 ? maxHeight * 0.25 : maxHeight * 0.2;
+
+        // Responsive text scaling
+        double responsiveFontSize(double baseSize) {
+          return maxWidth > 600 ? baseSize : baseSize * (maxWidth / 600);
+        }
+
+        return Scaffold(
+          backgroundColor: Colors.white,
+          appBar: AppBar(
+            backgroundColor: Colors.white,
+            title: Text(
+              widget.note.id.isEmpty ? 'Add Task' : 'Edit Task',
+              style: GoogleFonts.montserrat(
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+                fontSize: responsiveFontSize(18),
               ),
             ),
-        ],
-      ),
-      body: FadeTransition(
-        opacity: _fadeAnimation,
-        child: SlideTransition(
-          position: _slideAnimation,
-          child: GestureDetector(
-            onTap: () => FocusScope.of(context).unfocus(),
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: width * 0.05),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(height: height * 0.02),
-                    Center(
-                      child: Hero(
-                        tag: 'note_image',
-                        child: Image.asset(
-                          "assets/images/add_notes-bro.png",
-                          height: height * 0.25,
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: height * 0.03),
-                    Text(
-                      "Title",
-                      style: GoogleFonts.montserrat(
-                        color: Colors.black87,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    SizedBox(height: height * 0.01),
-                    TextFormField(
-                      style: GoogleFonts.montserrat(
-                        color: Colors.black,
-                        fontSize: 16,
-                      ),
-                      controller: _titleController,
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Colors.grey.shade50,
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide:
-                              BorderSide(color: Colors.grey.shade300, width: 1),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide:
-                              const BorderSide(color: mainColor, width: 1.5),
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        hintText: 'Enter task title',
-                        hintStyle: GoogleFonts.montserrat(
-                          color: Colors.grey,
-                          fontSize: 16,
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 16),
-                      ),
-                    ),
-                    SizedBox(height: height * 0.03),
-                    Text(
-                      "Description",
-                      style: GoogleFonts.montserrat(
-                        color: Colors.black87,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    SizedBox(height: height * 0.01),
-                    TextField(
-                      style: GoogleFonts.montserrat(
-                        color: Colors.black,
-                        fontSize: 16,
-                      ),
-                      controller: _contentController,
-                      maxLines: 5,
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Colors.grey.shade50,
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide:
-                              BorderSide(color: Colors.grey.shade300, width: 1),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide:
-                              const BorderSide(color: mainColor, width: 1.5),
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        hintText: 'Enter task description',
-                        hintStyle: GoogleFonts.montserrat(
-                          color: Colors.grey,
-                          fontSize: 16,
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 16),
-                      ),
-                    ),
-                    SizedBox(height: height * 0.03),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade50,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.grey.shade300),
-                      ),
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(12),
-                        onTap: () {
-                          setState(() {
-                            _isCompleted = !_isCompleted;
-                          });
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 12, horizontal: 16),
-                          child: Row(
-                            children: [
-                              Transform.scale(
-                                scale: 1.1,
-                                child: Checkbox(
-                                  value: _isCompleted,
-                                  activeColor: completedTask,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(6),
-                                  ),
-                                  side: BorderSide(
-                                    width: 1.5,
-                                    color: _isCompleted
-                                        ? completedTask
-                                        : Colors.grey.shade400,
-                                  ),
-                                  onChanged: (bool? value) {
-                                    setState(() {
-                                      _isCompleted = value ?? false;
-                                    });
-                                  },
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Text(
-                                'Mark as completed',
-                                style: GoogleFonts.montserrat(
-                                  color: Colors.black87,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              if (_isCompleted) ...[
-                                const SizedBox(width: 8),
-                                const Icon(
-                                  Icons.check_circle_outline,
-                                  color: completedTask,
-                                  size: 20,
-                                ),
-                              ],
-                            ],
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+              onPressed: () => Navigator.pop(context),
+            ),
+            elevation: 0,
+            actions: [
+              if (!widget.note.id.isEmpty)
+                IconButton(
+                  onPressed: () {
+                    _confirmDelete(context);
+                  },
+                  icon: const Icon(
+                    Icons.delete_outline_rounded,
+                    color: Colors.red,
+                  ),
+                ),
+            ],
+          ),
+          body: FadeTransition(
+            opacity: _fadeAnimation,
+            child: SlideTransition(
+              position: _slideAnimation,
+              child: GestureDetector(
+                onTap: () => FocusScope.of(context).unfocus(),
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  child: Padding(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: horizontalPadding),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(height: verticalSpacing),
+                        Center(
+                          child: Hero(
+                            tag: 'note_image',
+                            child: Image.asset(
+                              "assets/images/add_notes-bro.png",
+                              height: imageHeight,
+                              fit: BoxFit.contain,
+                            ),
                           ),
                         ),
-                      ),
+                        SizedBox(height: verticalSpacing),
+
+                        // Task Date Selection
+                        _buildSectionTitle(
+                            context, "Task Date", responsiveFontSize(16)),
+                        SizedBox(height: verticalSpacing * 0.5),
+                        _buildDateSelector(
+                            context, responsiveFontSize(16), maxWidth),
+                        SizedBox(height: verticalSpacing),
+
+                        // Title Input
+                        _buildSectionTitle(
+                            context, "Title", responsiveFontSize(16)),
+                        SizedBox(height: verticalSpacing * 0.5),
+                        _buildTitleInput(context, responsiveFontSize(16)),
+                        SizedBox(height: verticalSpacing),
+
+                        // Description Input
+                        _buildSectionTitle(
+                            context, "Description", responsiveFontSize(16)),
+                        SizedBox(height: verticalSpacing * 0.5),
+                        _buildDescriptionInput(context, responsiveFontSize(16)),
+                        SizedBox(height: verticalSpacing),
+
+                        // Completed Task Checkbox
+                        _buildCompletedTaskToggle(context),
+                        SizedBox(height: verticalSpacing),
+
+                        // Save Button
+                        _buildSaveButton(
+                            context, responsiveFontSize(18), maxWidth),
+                        SizedBox(height: verticalSpacing * 0.5),
+                      ],
                     ),
-                    SizedBox(height: height * 0.04),
-                    SizedBox(
-                      width: double.infinity,
-                      height: height * 0.06,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: mainColor,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        onPressed: _isLoading ? null : _saveNote,
-                        child: _isLoading
-                            ? const SizedBox(
-                                width: 24,
-                                height: 24,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : Text(
-                                widget.note.id.isEmpty
-                                    ? 'Add Task'
-                                    : 'Save Changes',
-                                style: GoogleFonts.montserrat(
-                                  color: Colors.white,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                      ),
-                    ),
-                    SizedBox(height: height * 0.02),
-                  ],
+                  ),
                 ),
               ),
             ),
           ),
+        );
+      },
+    );
+  }
+
+  // Helper methods to break down the build method
+  Widget _buildSectionTitle(
+      BuildContext context, String title, double fontSize) {
+    return Text(
+      title,
+      style: GoogleFonts.montserrat(
+        color: Colors.black87,
+        fontSize: fontSize,
+        fontWeight: FontWeight.w600,
+      ),
+    );
+  }
+
+  Widget _buildDateSelector(
+      BuildContext context, double fontSize, double maxWidth) {
+    final formattedDate = DateFormat('MMM d, yyyy').format(_selectedDate);
+
+    return GestureDetector(
+      onTap: () => _selectDate(context),
+      child: Container(
+        width: double.infinity,
+        padding: EdgeInsets.symmetric(
+            horizontal: maxWidth > 600 ? 20 : 15, vertical: 15),
+        decoration: BoxDecoration(
+          color: Colors.grey.shade50,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey.shade300),
         ),
+        child: Row(
+          children: [
+            Icon(
+              Icons.calendar_today,
+              color: mainColor,
+              size: 20,
+            ),
+            const SizedBox(width: 12),
+            Text(
+              formattedDate,
+              style: GoogleFonts.montserrat(
+                fontSize: fontSize,
+                color: Colors.black,
+              ),
+            ),
+            const Spacer(),
+            Container(
+              padding: const EdgeInsets.all(5),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade200,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.edit_calendar,
+                color: Colors.grey.shade700,
+                size: 16,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTitleInput(BuildContext context, double fontSize) {
+    return TextFormField(
+      style: GoogleFonts.montserrat(
+        color: Colors.black,
+        fontSize: fontSize,
+      ),
+      controller: _titleController,
+      decoration: InputDecoration(
+        filled: true,
+        fillColor: Colors.grey.shade50,
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade300, width: 1),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: mainColor, width: 1.5),
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        hintText: 'Enter task title',
+        hintStyle: GoogleFonts.montserrat(
+          color: Colors.grey,
+          fontSize: fontSize,
+        ),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      ),
+    );
+  }
+
+  Widget _buildDescriptionInput(BuildContext context, double fontSize) {
+    return TextField(
+      style: GoogleFonts.montserrat(
+        color: Colors.black,
+        fontSize: fontSize,
+      ),
+      controller: _contentController,
+      maxLines: 5,
+      decoration: InputDecoration(
+        filled: true,
+        fillColor: Colors.grey.shade50,
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade300, width: 1),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: mainColor, width: 1.5),
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        hintText: 'Enter task description',
+        hintStyle: GoogleFonts.montserrat(
+          color: Colors.grey,
+          fontSize: fontSize,
+        ),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      ),
+    );
+  }
+
+  Widget _buildCompletedTaskToggle(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: () {
+          setState(() {
+            _isCompleted = !_isCompleted;
+          });
+        },
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+          child: Row(
+            children: [
+              Transform.scale(
+                scale: 1.1,
+                child: Checkbox(
+                  value: _isCompleted,
+                  activeColor: completedTask,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  side: BorderSide(
+                    width: 1.5,
+                    color: _isCompleted ? completedTask : Colors.grey.shade400,
+                  ),
+                  onChanged: (bool? value) {
+                    setState(() {
+                      _isCompleted = value ?? false;
+                    });
+                  },
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                'Mark as completed',
+                style: GoogleFonts.montserrat(
+                  color: Colors.black87,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              if (_isCompleted) ...[
+                const SizedBox(width: 8),
+                const Icon(
+                  Icons.check_circle_outline,
+                  color: completedTask,
+                  size: 20,
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSaveButton(
+      BuildContext context, double fontSize, double maxWidth) {
+    return SizedBox(
+      width: double.infinity,
+      height: maxWidth > 600 ? 60 : 50,
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: mainColor,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        onPressed: _isLoading ? null : _saveNote,
+        child: _isLoading
+            ? const SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 2,
+                ),
+              )
+            : Text(
+                widget.note.id.isEmpty ? 'Add Task' : 'Save Changes',
+                style: GoogleFonts.montserrat(
+                  color: Colors.white,
+                  fontSize: fontSize,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
       ),
     );
   }
@@ -390,6 +527,7 @@ class _NoteEditState extends ConsumerState<NoteEdit>
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
+          backgroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),

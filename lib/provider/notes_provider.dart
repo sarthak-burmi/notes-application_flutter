@@ -135,15 +135,18 @@ class NotesNotifier extends StateNotifier<NotesState> {
         throw Exception("No authenticated user found");
       }
 
-      // Ensure the note has the correct owner_id
-      final noteWithOwnerId = note.copyWith(
+      // Ensure the note has the correct owner_id and dates
+      final noteWithUpdatedFields = note.copyWith(
         ownerId: userId,
         createdAt: DateTime.now().toIso8601String(),
         updatedAt: DateTime.now().toIso8601String(),
+        taskDate: note.taskDate ??
+            DateTime.now()
+                .toIso8601String(), // Use provided task date or fallback to now
       );
 
       // Optimistically update the UI
-      final optimisticNote = noteWithOwnerId.copyWith(
+      final optimisticNote = noteWithUpdatedFields.copyWith(
         id: 'temp-${DateTime.now().millisecondsSinceEpoch}',
       );
 
@@ -153,7 +156,7 @@ class NotesNotifier extends StateNotifier<NotesState> {
 
       final res = await _supabase
           .from('notes')
-          .insert(noteWithOwnerId.toMap())
+          .insert(noteWithUpdatedFields.toMap())
           .select();
 
       if (res.isNotEmpty) {

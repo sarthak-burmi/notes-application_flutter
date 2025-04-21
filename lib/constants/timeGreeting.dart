@@ -17,59 +17,71 @@ class TimeGreetingScreen extends ConsumerWidget {
     String formattedDate = DateFormat('MMMM d, yyyy').format(now);
     String weekday = DateFormat('EEEE').format(now);
 
+    // Get screen size for responsive layout
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.width < 360;
+
     return Row(
       children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Text(
-                  greeting,
-                  style: GoogleFonts.montserrat(
-                    color: Colors.black87,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Flexible(
+                    child: Text(
+                      greeting,
+                      style: GoogleFonts.montserrat(
+                        color: Colors.black87,
+                        fontSize: isSmallScreen ? 16 : 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  emoji,
-                  style: const TextStyle(
-                    fontSize: 18,
+                  const SizedBox(width: 8),
+                  Text(
+                    emoji,
+                    style: TextStyle(
+                      fontSize: isSmallScreen ? 16 : 18,
+                    ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Row(
-              children: [
-                const Icon(
-                  Icons.calendar_today_rounded,
-                  size: 14,
-                  color: Colors.black54,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  "$formattedDate, $weekday",
-                  style: GoogleFonts.montserrat(
+                ],
+              ),
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  const Icon(
+                    Icons.calendar_today_rounded,
+                    size: 14,
                     color: Colors.black54,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
                   ),
-                ),
-              ],
-            ),
-            // if (authUser != null && authUser.email != null)
-            //   Text(
-            //     authUser.email!,
-            //     style: GoogleFonts.montserrat(
-            //       color: Colors.black54,
-            //       fontSize: 14,
-            //     ),
-            //     overflow: TextOverflow.ellipsis,
-            //   ),
-          ],
+                  const SizedBox(width: 4),
+                  Flexible(
+                    child: Text(
+                      "$formattedDate, $weekday",
+                      style: GoogleFonts.montserrat(
+                        color: Colors.black54,
+                        fontSize: isSmallScreen ? 10 : 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+              // if (authUser != null && authUser.email != null)
+              //   Text(
+              //     authUser.email!,
+              //     style: GoogleFonts.montserrat(
+              //       color: Colors.black54,
+              //       fontSize: 14,
+              //     ),
+              //     overflow: TextOverflow.ellipsis,
+              //   ),
+            ],
+          ),
         ),
       ],
     );

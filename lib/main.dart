@@ -1,9 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:notes_app_solulab/autherntication/Login.dart';
+import 'package:notes_app_solulab/constants/appTheme.dart';
 import 'package:notes_app_solulab/core/supaBase_client.dart';
 import 'package:notes_app_solulab/provider/auth_provider.dart';
 import 'package:notes_app_solulab/screens/notes_list.dart';
+
+// Theme Mode Provider
+final themeModeProvider =
+    StateNotifierProvider<ThemeModeNotifier, ThemeMode>((ref) {
+  return ThemeModeNotifier();
+});
+
+class ThemeModeNotifier extends StateNotifier<ThemeMode> {
+  ThemeModeNotifier() : super(ThemeMode.system);
+
+  void toggleTheme() {
+    state = state == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
+  }
+
+  void setThemeMode(ThemeMode mode) {
+    state = mode;
+  }
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,13 +42,17 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeModeProvider);
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Note Taking App',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        useMaterial3: true,
-      ),
+      title: 'TaskHub',
+
+      // Theme configuration
+      theme: AppThemes.lightTheme,
+      darkTheme: AppThemes.darkTheme,
+      themeMode: themeMode,
+
       home: const AuthGate(),
     );
   }

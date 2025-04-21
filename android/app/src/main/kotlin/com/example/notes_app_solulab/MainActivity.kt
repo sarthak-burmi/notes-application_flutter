@@ -1,4 +1,4 @@
-package com.example.notes_app_solulab
+package com.taskhub.taskhub
 
 import io.flutter.embedding.android.FlutterActivity
 
