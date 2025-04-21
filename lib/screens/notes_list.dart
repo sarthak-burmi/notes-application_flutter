@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:notes_app_solulab/constants/colors.dart';
 import 'package:notes_app_solulab/constants/timeGreeting.dart';
+import 'package:notes_app_solulab/main.dart';
 import 'package:notes_app_solulab/model/notesModel.dart';
 import 'package:notes_app_solulab/provider/auth_provider.dart';
 import 'package:notes_app_solulab/provider/notes_provider.dart';
@@ -80,6 +81,10 @@ class _NoteListState extends ConsumerState<NoteList> {
 
   @override
   Widget build(BuildContext context) {
+    // Get theme data
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+
     // Get screen dimensions for responsiveness
     final screenSize = MediaQuery.of(context).size;
     final width = screenSize.width;
@@ -113,28 +118,30 @@ class _NoteListState extends ConsumerState<NoteList> {
         filteredNotes.where((note) => note.isCompleted).length;
 
     if (authUser == null) {
-      return const Scaffold(
+      return Scaffold(
         body: Center(
-          child: CircularProgressIndicator(),
+          child: CircularProgressIndicator(
+            color: theme.colorScheme.primary,
+          ),
         ),
       );
     }
 
     if (notesState.isLoading) {
       return Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: theme.scaffoldBackgroundColor,
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const CircularProgressIndicator(
-                color: mainColor,
+              CircularProgressIndicator(
+                color: theme.colorScheme.primary,
               ),
               const SizedBox(height: 20),
               Text(
                 'Loading your tasks...',
                 style: GoogleFonts.montserrat(
-                  color: Colors.black54,
+                  color: theme.textTheme.bodyMedium?.color,
                   fontSize: 16,
                 ),
               ),
@@ -145,11 +152,12 @@ class _NoteListState extends ConsumerState<NoteList> {
     }
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           children: [
             SizedBox(height: height * 0.02),
+
             Padding(
               padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
               child: Row(
@@ -161,7 +169,7 @@ class _NoteListState extends ConsumerState<NoteList> {
                         Text(
                           'Task Hub',
                           style: GoogleFonts.montserrat(
-                            color: Colors.black,
+                            color: theme.textTheme.displayLarge?.color,
                             fontSize: isSmallScreen ? 18 : 20,
                             fontWeight: FontWeight.bold,
                           ),
@@ -172,7 +180,7 @@ class _NoteListState extends ConsumerState<NoteList> {
                               ? 'Hello, ${userMetadata['name']}!'
                               : 'Hello!',
                           style: GoogleFonts.montserrat(
-                            color: Colors.black54,
+                            color: theme.textTheme.bodyMedium?.color,
                             fontSize: isSmallScreen ? 12 : 14,
                           ),
                           overflow: TextOverflow.ellipsis,
@@ -180,9 +188,12 @@ class _NoteListState extends ConsumerState<NoteList> {
                       ],
                     ),
                   ),
+                  _buildThemeToggleButton(
+                      context, ref), // Add theme toggle button here
+                  SizedBox(width: 8),
                   Container(
                     decoration: BoxDecoration(
-                      color: Colors.red.withOpacity(0.1),
+                      color: Colors.red.withOpacity(isDarkMode ? 0.2 : 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: IconButton(
@@ -194,7 +205,8 @@ class _NoteListState extends ConsumerState<NoteList> {
                             toastLength: Toast.LENGTH_SHORT,
                             gravity: ToastGravity.BOTTOM,
                             timeInSecForIosWeb: 1,
-                            backgroundColor: Colors.black87,
+                            backgroundColor:
+                                isDarkMode ? Colors.grey[800] : Colors.black87,
                             textColor: Colors.white,
                             fontSize: 16.0,
                           );
@@ -244,7 +256,7 @@ class _NoteListState extends ConsumerState<NoteList> {
                         'Total Tasks',
                         totalTasks.toString(),
                         Icons.note_alt_outlined,
-                        mainColor,
+                        theme.colorScheme.primary,
                         isSmallScreen),
                   ),
                   SizedBox(width: width * 0.03),
@@ -268,28 +280,34 @@ class _NoteListState extends ConsumerState<NoteList> {
               child: Container(
                 padding: EdgeInsets.all(isSmallScreen ? 8 : 12),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: theme.cardTheme.color ??
+                      (isDarkMode ? theme.colorScheme.surface : Colors.white),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.grey.shade200),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.1),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
+                  border: Border.all(
+                      color: isDarkMode
+                          ? Colors.grey.shade800
+                          : Colors.grey.shade200),
+                  boxShadow: isDarkMode
+                      ? null
+                      : [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.1),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                 ),
                 child: Row(
                   children: [
                     Container(
                       padding: EdgeInsets.all(isSmallScreen ? 6 : 8),
                       decoration: BoxDecoration(
-                        color: mainColor.withOpacity(0.1),
+                        color: theme.colorScheme.primary.withOpacity(0.1),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
                         _showAllTasks ? Icons.visibility : Icons.filter_list,
-                        color: mainColor,
+                        color: theme.colorScheme.primary,
                         size: isSmallScreen ? 16 : 18,
                       ),
                     ),
@@ -303,7 +321,7 @@ class _NoteListState extends ConsumerState<NoteList> {
                             style: GoogleFonts.montserrat(
                               fontWeight: FontWeight.w600,
                               fontSize: isSmallScreen ? 12 : 14,
-                              color: Colors.black87,
+                              color: theme.textTheme.displayLarge?.color,
                             ),
                           ),
                           Text(
@@ -312,7 +330,7 @@ class _NoteListState extends ConsumerState<NoteList> {
                                 : "Showing tasks only for selected date",
                             style: GoogleFonts.montserrat(
                               fontSize: isSmallScreen ? 10 : 12,
-                              color: Colors.black54,
+                              color: theme.textTheme.bodyMedium?.color,
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -323,7 +341,7 @@ class _NoteListState extends ConsumerState<NoteList> {
                       scale: isSmallScreen ? 0.8 : 1.0,
                       child: CupertinoSwitch(
                         value: _showAllTasks,
-                        activeColor: mainColor,
+                        activeColor: theme.colorScheme.primary,
                         onChanged: (value) {
                           setState(() {
                             _showAllTasks = value;
@@ -341,7 +359,7 @@ class _NoteListState extends ConsumerState<NoteList> {
             Row(
               children: [
                 Expanded(
-                  child: _buildDateSelector(isSmallScreen),
+                  child: _buildDateSelector(isSmallScreen, theme, isDarkMode),
                 ),
               ],
             ),
@@ -351,8 +369,15 @@ class _NoteListState extends ConsumerState<NoteList> {
               child: Padding(
                 padding:
                     EdgeInsets.symmetric(horizontal: horizontalPadding * 0.8),
-                child: _buildNotesList(context, ref, filteredNotes,
-                    notesState.isLoading, isSmallScreen),
+                child: _buildNotesList(
+                  context,
+                  ref,
+                  filteredNotes,
+                  notesState.isLoading,
+                  isSmallScreen,
+                ),
+                // child: _buildNotesList(context, ref, filteredNotes,
+                //     notesState.isLoading, isSmallScreen, theme, isDarkMode),
               ),
             ),
           ],
@@ -360,34 +385,87 @@ class _NoteListState extends ConsumerState<NoteList> {
       ),
       floatingActionButton:
           _buildAddNoteButton(context, ref, authUser.id, isSmallScreen),
+      // floatingActionButton:
+      //     _buildAddNoteButton(context, ref, authUser.id, isSmallScreen, theme),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+    );
+  }
+
+  Widget _buildThemeToggleButton(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeModeProvider);
+
+    // Choose icon based on current theme mode
+    IconData themeIcon;
+    if (themeMode == ThemeMode.light) {
+      themeIcon = Icons.light_mode;
+    } else if (themeMode == ThemeMode.dark) {
+      themeIcon = Icons.dark_mode;
+    } else {
+      themeIcon = Icons.brightness_auto;
+    }
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: IconButton(
+        onPressed: () {
+          // Cycle through theme modes: light -> dark -> system -> light
+          if (themeMode == ThemeMode.light) {
+            ref.read(themeModeProvider.notifier).setThemeMode(ThemeMode.dark);
+          } else if (themeMode == ThemeMode.dark) {
+            ref.read(themeModeProvider.notifier).setThemeMode(ThemeMode.system);
+          } else {
+            ref.read(themeModeProvider.notifier).setThemeMode(ThemeMode.light);
+          }
+        },
+        icon: Icon(
+          themeIcon,
+          color: Theme.of(context).colorScheme.primary,
+          size: MediaQuery.of(context).size.width < 360 ? 20 : 24,
+        ),
+        constraints: BoxConstraints(
+          minWidth: MediaQuery.of(context).size.width < 360 ? 32 : 48,
+          minHeight: MediaQuery.of(context).size.width < 360 ? 32 : 48,
+        ),
+        padding:
+            EdgeInsets.all(MediaQuery.of(context).size.width < 360 ? 6 : 12),
+      ),
     );
   }
 
   Widget _buildStatCard(BuildContext context, String title, String value,
       IconData icon, Color color, bool isSmallScreen) {
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+
     return Container(
       padding: EdgeInsets.symmetric(
           vertical: isSmallScreen ? 12 : 16,
           horizontal: isSmallScreen ? 14 : 18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.cardTheme.color ??
+            (isDarkMode ? theme.colorScheme.surface : Colors.white),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade200),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        border: Border.all(
+            color: isDarkMode ? Colors.grey.shade800 : Colors.grey.shade200),
+        boxShadow: isDarkMode
+            ? null
+            : [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.1),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
       ),
       child: Row(
         children: [
           Container(
             padding: EdgeInsets.all(isSmallScreen ? 6 : 8),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withOpacity(isDarkMode ? 0.2 : 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(
@@ -404,7 +482,7 @@ class _NoteListState extends ConsumerState<NoteList> {
                 Text(
                   value,
                   style: GoogleFonts.montserrat(
-                    color: Colors.black87,
+                    color: theme.textTheme.displayLarge?.color,
                     fontWeight: FontWeight.bold,
                     fontSize: isSmallScreen ? 16 : 18,
                   ),
@@ -413,7 +491,7 @@ class _NoteListState extends ConsumerState<NoteList> {
                 Text(
                   title,
                   style: GoogleFonts.montserrat(
-                    color: Colors.black54,
+                    color: theme.textTheme.bodyMedium?.color,
                     fontSize: isSmallScreen ? 10 : 12,
                   ),
                   overflow: TextOverflow.ellipsis,
@@ -427,7 +505,8 @@ class _NoteListState extends ConsumerState<NoteList> {
   }
 
   // Date selector widget
-  Widget _buildDateSelector(bool isSmallScreen) {
+  Widget _buildDateSelector(
+      bool isSmallScreen, ThemeData theme, bool isDarkMode) {
     return Container(
       height: isSmallScreen ? 80 : 90,
       padding: const EdgeInsets.only(left: 10),
@@ -438,6 +517,47 @@ class _NoteListState extends ConsumerState<NoteList> {
           final date = _dateList[index];
           final isToday = _isDateToday(date);
           final isSelected = _isSameDay(date, _selectedDate);
+
+          // Define colors based on theme
+          final todayBgColor = isDarkMode
+              ? Colors.blue.shade900.withOpacity(0.3)
+              : Colors.blue.shade50;
+
+          final todayBorderColor =
+              isDarkMode ? Colors.blue.shade700 : Colors.blue.shade300;
+
+          final normalBgColor = isDarkMode
+              ? theme.colorScheme.surface.withOpacity(0.5)
+              : Colors.grey.shade50;
+
+          final normalBorderColor =
+              isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300;
+
+          final selectedBoxShadow = isDarkMode
+              ? [
+                  BoxShadow(
+                    color: theme.colorScheme.primary.withOpacity(0.5),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  )
+                ]
+              : [
+                  BoxShadow(
+                    color: theme.colorScheme.primary.withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  )
+                ];
+
+          final todayBoxShadow = isDarkMode
+              ? null
+              : [
+                  BoxShadow(
+                    color: Colors.blue.shade200.withOpacity(0.2),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  )
+                ];
 
           return GestureDetector(
             onTap: () {
@@ -454,32 +574,18 @@ class _NoteListState extends ConsumerState<NoteList> {
               margin: EdgeInsets.only(right: 8, bottom: isSmallScreen ? 8 : 10),
               decoration: BoxDecoration(
                 color: isSelected
-                    ? mainColor
-                    : (isToday ? Colors.blue.shade50 : Colors.grey.shade50),
+                    ? theme.colorScheme.primary
+                    : (isToday ? todayBgColor : normalBgColor),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
                   color: isSelected
-                      ? mainColor
-                      : (isToday ? Colors.blue.shade300 : Colors.grey.shade300),
+                      ? theme.colorScheme.primary
+                      : (isToday ? todayBorderColor : normalBorderColor),
                   width: isToday ? 1.5 : 1.0,
                 ),
                 boxShadow: isSelected
-                    ? [
-                        BoxShadow(
-                          color: mainColor.withOpacity(0.3),
-                          blurRadius: 8,
-                          offset: const Offset(0, 4),
-                        )
-                      ]
-                    : (isToday
-                        ? [
-                            BoxShadow(
-                              color: Colors.blue.shade200.withOpacity(0.2),
-                              blurRadius: 4,
-                              offset: const Offset(0, 2),
-                            )
-                          ]
-                        : null),
+                    ? selectedBoxShadow
+                    : (isToday ? todayBoxShadow : null),
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -491,7 +597,11 @@ class _NoteListState extends ConsumerState<NoteList> {
                     style: GoogleFonts.montserrat(
                       color: isSelected
                           ? Colors.white
-                          : (isToday ? Colors.blue.shade700 : Colors.black54),
+                          : (isToday
+                              ? (isDarkMode
+                                  ? Colors.blue.shade300
+                                  : Colors.blue.shade700)
+                              : theme.textTheme.bodyMedium?.color),
                       fontWeight: FontWeight.w600,
                       fontSize: isSmallScreen ? 10 : 12,
                     ),
@@ -507,8 +617,12 @@ class _NoteListState extends ConsumerState<NoteList> {
                       date.day.toString(),
                       style: GoogleFonts.montserrat(
                         color: isSelected
-                            ? mainColor
-                            : (isToday ? Colors.blue.shade700 : Colors.black87),
+                            ? theme.colorScheme.primary
+                            : (isToday
+                                ? (isDarkMode
+                                    ? Colors.blue.shade300
+                                    : Colors.blue.shade700)
+                                : theme.textTheme.displayLarge?.color),
                         fontWeight: FontWeight.bold,
                         fontSize: isSmallScreen ? 12 : 14,
                       ),
@@ -525,6 +639,9 @@ class _NoteListState extends ConsumerState<NoteList> {
 
   Widget _buildNoteItem(
       BuildContext context, WidgetRef ref, Note note, bool isSmallScreen) {
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+
     // Format task date for display
     String formattedTaskDate = "";
     try {
@@ -572,7 +689,7 @@ class _NoteListState extends ConsumerState<NoteList> {
                         ),
                       );
                     },
-                    backgroundColor: mainColor,
+                    backgroundColor: theme.colorScheme.primary,
                     foregroundColor: Colors.white,
                     icon: Icons.edit,
                     label: 'Edit',
@@ -582,14 +699,19 @@ class _NoteListState extends ConsumerState<NoteList> {
               child: Card(
                 elevation: 0,
                 margin: EdgeInsets.zero,
-                color: note.isCompleted ? Colors.grey.shade50 : Colors.white,
+                color: note.isCompleted
+                    ? (isDarkMode ? Colors.grey.shade800 : Colors.grey.shade50)
+                    : (isDarkMode ? theme.colorScheme.surface : Colors.white),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                   side: BorderSide(
                     width: 1.5,
                     color: note.isCompleted
-                        ? Colors.grey.shade300
-                        : mainColor.withOpacity(0.3),
+                        ? (isDarkMode
+                            ? Colors.grey.shade700
+                            : Colors.grey.shade300)
+                        : theme.colorScheme.primary
+                            .withOpacity(isDarkMode ? 0.5 : 0.3),
                   ),
                 ),
                 child: InkWell(
@@ -621,7 +743,9 @@ class _NoteListState extends ConsumerState<NoteList> {
                               width: 1.5,
                               color: note.isCompleted
                                   ? completedTask
-                                  : Colors.grey.shade400,
+                                  : (isDarkMode
+                                      ? Colors.grey.shade400
+                                      : Colors.grey.shade400),
                             ),
                             onChanged: (bool? value) {
                               ref
@@ -639,8 +763,10 @@ class _NoteListState extends ConsumerState<NoteList> {
                                 note.title,
                                 style: GoogleFonts.montserrat(
                                   color: note.isCompleted
-                                      ? Colors.grey
-                                      : Colors.black,
+                                      ? (isDarkMode
+                                          ? Colors.grey.shade400
+                                          : Colors.grey)
+                                      : theme.textTheme.displayLarge?.color,
                                   fontWeight: FontWeight.bold,
                                   fontSize: isSmallScreen ? 16 : 18,
                                   decoration: note.isCompleted
@@ -656,8 +782,10 @@ class _NoteListState extends ConsumerState<NoteList> {
                                 style: GoogleFonts.montserrat(
                                   fontSize: isSmallScreen ? 12 : 14,
                                   color: note.isCompleted
-                                      ? Colors.grey
-                                      : Colors.black54,
+                                      ? (isDarkMode
+                                          ? Colors.grey.shade500
+                                          : Colors.grey)
+                                      : theme.textTheme.bodyMedium?.color,
                                   decoration: note.isCompleted
                                       ? TextDecoration.lineThrough
                                       : TextDecoration.none,
@@ -676,7 +804,9 @@ class _NoteListState extends ConsumerState<NoteList> {
                                       Icon(
                                         Icons.calendar_today_outlined,
                                         size: isSmallScreen ? 10 : 12,
-                                        color: Colors.grey,
+                                        color: isDarkMode
+                                            ? Colors.grey.shade400
+                                            : Colors.grey,
                                       ),
                                       SizedBox(width: isSmallScreen ? 2 : 4),
                                       Flexible(
@@ -684,7 +814,9 @@ class _NoteListState extends ConsumerState<NoteList> {
                                           "Task: $formattedTaskDate",
                                           style: GoogleFonts.montserrat(
                                             fontSize: isSmallScreen ? 10 : 12,
-                                            color: Colors.grey,
+                                            color: isDarkMode
+                                                ? Colors.grey.shade400
+                                                : Colors.grey,
                                           ),
                                           overflow: TextOverflow.ellipsis,
                                         ),
@@ -697,7 +829,9 @@ class _NoteListState extends ConsumerState<NoteList> {
                                       Icon(
                                         Icons.access_time_rounded,
                                         size: isSmallScreen ? 10 : 12,
-                                        color: Colors.grey,
+                                        color: isDarkMode
+                                            ? Colors.grey.shade400
+                                            : Colors.grey,
                                       ),
                                       SizedBox(width: isSmallScreen ? 2 : 4),
                                       Flexible(
@@ -705,7 +839,9 @@ class _NoteListState extends ConsumerState<NoteList> {
                                           "Created: ${_getTimeAgo(note.createdAt)}",
                                           style: GoogleFonts.montserrat(
                                             fontSize: isSmallScreen ? 10 : 12,
-                                            color: Colors.grey,
+                                            color: isDarkMode
+                                                ? Colors.grey.shade400
+                                                : Colors.grey,
                                           ),
                                           overflow: TextOverflow.ellipsis,
                                         ),
@@ -756,12 +892,15 @@ class _NoteListState extends ConsumerState<NoteList> {
 
   void _confirmDelete(BuildContext context, WidgetRef ref, String noteId) {
     final isSmallScreen = MediaQuery.of(context).size.width < 360;
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
 
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          backgroundColor: Colors.white,
+          backgroundColor:
+              isDarkMode ? theme.colorScheme.surface : Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
@@ -770,12 +909,14 @@ class _NoteListState extends ConsumerState<NoteList> {
             style: GoogleFonts.montserrat(
               fontWeight: FontWeight.bold,
               fontSize: isSmallScreen ? 16 : 18,
+              color: theme.textTheme.displayLarge?.color,
             ),
           ),
           content: Text(
             'Are you sure you want to delete this task?',
             style: GoogleFonts.montserrat(
               fontSize: isSmallScreen ? 14 : 16,
+              color: theme.textTheme.bodyMedium?.color,
             ),
           ),
           actions: <Widget>[
@@ -783,7 +924,7 @@ class _NoteListState extends ConsumerState<NoteList> {
               child: Text(
                 'Cancel',
                 style: GoogleFonts.montserrat(
-                  color: Colors.black54,
+                  color: isDarkMode ? Colors.grey.shade300 : Colors.black54,
                   fontSize: isSmallScreen ? 12 : 14,
                 ),
               ),
@@ -814,7 +955,8 @@ class _NoteListState extends ConsumerState<NoteList> {
                 Navigator.of(context).pop();
                 Fluttertoast.showToast(
                   msg: "Task deleted successfully",
-                  backgroundColor: Colors.black87,
+                  backgroundColor:
+                      isDarkMode ? Colors.grey.shade800 : Colors.black87,
                 );
               },
             ),
@@ -864,6 +1006,9 @@ class _NoteListState extends ConsumerState<NoteList> {
 
   Widget _buildNotesList(BuildContext context, WidgetRef ref, List<Note> notes,
       bool isLoading, bool isSmallScreen) {
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+
     if (isLoading) {
       return const Center(
         child: CircularProgressIndicator(color: mainColor),
@@ -884,7 +1029,7 @@ class _NoteListState extends ConsumerState<NoteList> {
               Text(
                 _showAllTasks ? 'No tasks found' : 'No tasks for this day',
                 style: GoogleFonts.montserrat(
-                  color: Colors.black54,
+                  color: theme.textTheme.displayLarge?.color,
                   fontSize: isSmallScreen ? 18 : 20,
                   fontWeight: FontWeight.w500,
                 ),
@@ -894,7 +1039,7 @@ class _NoteListState extends ConsumerState<NoteList> {
               Text(
                 'Tap the + button to create a new task',
                 style: GoogleFonts.montserrat(
-                  color: Colors.black38,
+                  color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
                   fontSize: isSmallScreen ? 12 : 14,
                 ),
                 textAlign: TextAlign.center,

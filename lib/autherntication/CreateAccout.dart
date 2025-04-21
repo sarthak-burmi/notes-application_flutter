@@ -153,6 +153,7 @@ class _CreateAccountScreenState extends ConsumerState<CreateAccountScreen>
     final mediaQuery = MediaQuery.of(context);
     final screenWidth = mediaQuery.size.width;
     final screenHeight = mediaQuery.size.height;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     // Responsive padding and spacing
     double horizontalPadding = screenWidth * 0.06;
@@ -161,8 +162,11 @@ class _CreateAccountScreenState extends ConsumerState<CreateAccountScreen>
     // Responsive text scaling
     double responsiveTextScale = mediaQuery.textScaleFactor;
 
+    // Get theme colors
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -190,12 +194,14 @@ class _CreateAccountScreenState extends ConsumerState<CreateAccountScreen>
                             child: Container(
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
-                                color: Colors.grey.shade100,
+                                color: isDarkMode
+                                    ? colorScheme.surface
+                                    : Colors.grey.shade100,
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.arrow_back_ios_new,
-                                color: Colors.black87,
+                                color: Theme.of(context).iconTheme.color,
                                 size: 20,
                               ),
                             ),
@@ -207,7 +213,10 @@ class _CreateAccountScreenState extends ConsumerState<CreateAccountScreen>
                             style: GoogleFonts.montserrat(
                               fontWeight: FontWeight.bold,
                               fontSize: 22 * responsiveTextScale,
-                              color: Colors.black87,
+                              color: Theme.of(context)
+                                  .textTheme
+                                  .displayLarge
+                                  ?.color,
                             ),
                           ),
                           SizedBox(height: verticalSpacing / 2),
@@ -216,8 +225,11 @@ class _CreateAccountScreenState extends ConsumerState<CreateAccountScreen>
                             fit: BoxFit.scaleDown,
                             child: RichText(
                               text: TextSpan(
-                                style: const TextStyle(
-                                  color: Colors.black,
+                                style: TextStyle(
+                                  color: Theme.of(context)
+                                      .textTheme
+                                      .bodyLarge
+                                      ?.color,
                                 ),
                                 children: [
                                   TextSpan(
@@ -225,7 +237,10 @@ class _CreateAccountScreenState extends ConsumerState<CreateAccountScreen>
                                     style: GoogleFonts.montserrat(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 32 * responsiveTextScale,
-                                      color: Colors.black87,
+                                      color: Theme.of(context)
+                                          .textTheme
+                                          .displayLarge
+                                          ?.color,
                                     ),
                                   ),
                                   TextSpan(
@@ -241,7 +256,7 @@ class _CreateAccountScreenState extends ConsumerState<CreateAccountScreen>
                             ),
                           ),
                           SizedBox(height: verticalSpacing),
-                          // Image
+                          // Image - using ColorFiltered to adjust image for dark mode
                           Center(
                             child: Hero(
                               tag: 'auth_image',
@@ -258,10 +273,12 @@ class _CreateAccountScreenState extends ConsumerState<CreateAccountScreen>
                             Container(
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
-                                color: Colors.red.withOpacity(0.1),
+                                color: Colors.red
+                                    .withOpacity(isDarkMode ? 0.2 : 0.1),
                                 borderRadius: BorderRadius.circular(10),
                                 border: Border.all(
-                                    color: Colors.red.withOpacity(0.3)),
+                                    color: Colors.red
+                                        .withOpacity(isDarkMode ? 0.4 : 0.3)),
                               ),
                               child: Row(
                                 children: [
@@ -291,6 +308,7 @@ class _CreateAccountScreenState extends ConsumerState<CreateAccountScreen>
                             icon: Icons.person_outline,
                             keyboardType: TextInputType.name,
                             textScale: responsiveTextScale,
+                            isDarkMode: isDarkMode,
                           ),
                           SizedBox(height: verticalSpacing),
 
@@ -302,12 +320,14 @@ class _CreateAccountScreenState extends ConsumerState<CreateAccountScreen>
                             icon: Icons.email_outlined,
                             keyboardType: TextInputType.emailAddress,
                             textScale: responsiveTextScale,
+                            isDarkMode: isDarkMode,
                           ),
                           SizedBox(height: verticalSpacing),
 
                           // Password field
                           _buildPasswordField(
                             textScale: responsiveTextScale,
+                            isDarkMode: isDarkMode,
                           ),
 
                           // Password requirements hint
@@ -317,7 +337,10 @@ class _CreateAccountScreenState extends ConsumerState<CreateAccountScreen>
                               'Password must be at least 6 characters',
                               style: GoogleFonts.montserrat(
                                 fontSize: 12 * responsiveTextScale,
-                                color: Colors.grey,
+                                color: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.color,
                               ),
                             ),
                           ),
@@ -355,6 +378,7 @@ class _CreateAccountScreenState extends ConsumerState<CreateAccountScreen>
     required IconData icon,
     required TextInputType keyboardType,
     required double textScale,
+    required bool isDarkMode,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -364,31 +388,30 @@ class _CreateAccountScreenState extends ConsumerState<CreateAccountScreen>
           style: GoogleFonts.montserrat(
             fontWeight: FontWeight.w600,
             fontSize: 14 * textScale,
-            color: Colors.black87,
+            color: Theme.of(context).textTheme.bodyLarge?.color,
           ),
         ),
         const SizedBox(height: 8),
         TextFormField(
           controller: controller,
           keyboardType: keyboardType,
-          style: GoogleFonts.montserrat(fontSize: 15 * textScale),
+          style: GoogleFonts.montserrat(
+            fontSize: 15 * textScale,
+            color: Theme.of(context).textTheme.bodyLarge?.color,
+          ),
           decoration: InputDecoration(
             hintText: hintText,
             hintStyle: GoogleFonts.montserrat(
               fontSize: 14 * textScale,
-              color: Colors.grey,
+              color: Theme.of(context).textTheme.bodyMedium?.color,
             ),
             filled: true,
-            fillColor: Colors.grey.shade50,
+            // Use theme's fillColor
+            fillColor: Theme.of(context).inputDecorationTheme.fillColor,
             prefixIcon: Icon(icon, color: mainColor),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey.shade300, width: 1),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: mainColor, width: 1.5),
-            ),
+            // Use theme's border styling
+            enabledBorder: Theme.of(context).inputDecorationTheme.enabledBorder,
+            focusedBorder: Theme.of(context).inputDecorationTheme.focusedBorder,
             contentPadding: const EdgeInsets.symmetric(
               vertical: 16,
               horizontal: 16,
@@ -402,6 +425,7 @@ class _CreateAccountScreenState extends ConsumerState<CreateAccountScreen>
   // Extracted method for password field
   Widget _buildPasswordField({
     required double textScale,
+    required bool isDarkMode,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -411,29 +435,32 @@ class _CreateAccountScreenState extends ConsumerState<CreateAccountScreen>
           style: GoogleFonts.montserrat(
             fontWeight: FontWeight.w600,
             fontSize: 14 * textScale,
-            color: Colors.black87,
+            color: Theme.of(context).textTheme.bodyLarge?.color,
           ),
         ),
         const SizedBox(height: 8),
         TextFormField(
           controller: _passwordController,
           obscureText: _obscurePassword,
-          style: GoogleFonts.montserrat(fontSize: 15 * textScale),
+          style: GoogleFonts.montserrat(
+            fontSize: 15 * textScale,
+            color: Theme.of(context).textTheme.bodyLarge?.color,
+          ),
           decoration: InputDecoration(
             hintText: 'Enter your password',
             hintStyle: GoogleFonts.montserrat(
               fontSize: 14 * textScale,
-              color: Colors.grey,
+              color: Theme.of(context).textTheme.bodyMedium?.color,
             ),
             filled: true,
-            fillColor: Colors.grey.shade50,
+            fillColor: Theme.of(context).inputDecorationTheme.fillColor,
             prefixIcon: const Icon(Icons.lock_outline, color: mainColor),
             suffixIcon: IconButton(
               icon: Icon(
                 _obscurePassword
                     ? Icons.visibility_off_outlined
                     : Icons.visibility_outlined,
-                color: Colors.grey,
+                color: Theme.of(context).iconTheme.color?.withOpacity(0.7),
               ),
               onPressed: () {
                 setState(() {
@@ -441,14 +468,9 @@ class _CreateAccountScreenState extends ConsumerState<CreateAccountScreen>
                 });
               },
             ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey.shade300, width: 1),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: mainColor, width: 1.5),
-            ),
+            // Use theme's border styling
+            enabledBorder: Theme.of(context).inputDecorationTheme.enabledBorder,
+            focusedBorder: Theme.of(context).inputDecorationTheme.focusedBorder,
             contentPadding: const EdgeInsets.symmetric(
               vertical: 16,
               horizontal: 16,
@@ -525,7 +547,7 @@ class _CreateAccountScreenState extends ConsumerState<CreateAccountScreen>
         Text(
           "Already have an account?",
           style: GoogleFonts.montserrat(
-            color: Colors.black54,
+            color: Theme.of(context).textTheme.bodyMedium?.color,
             fontSize: 14 * textScale,
           ),
         ),

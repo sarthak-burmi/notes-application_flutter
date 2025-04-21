@@ -72,6 +72,7 @@ class _NoteEditState extends ConsumerState<NoteEdit>
 
   // Date selection method
   Future<void> _selectDate(BuildContext context) async {
+    final ThemeData theme = Theme.of(context);
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: _selectedDate,
@@ -79,12 +80,18 @@ class _NoteEditState extends ConsumerState<NoteEdit>
       lastDate: DateTime(2101),
       builder: (context, child) {
         return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: mainColor,
-              onPrimary: Colors.white,
-              onSurface: Colors.black,
-            ),
+          data: theme.copyWith(
+            colorScheme: theme.brightness == Brightness.light
+                ? ColorScheme.light(
+                    primary: mainColor,
+                    onPrimary: Colors.white,
+                    onSurface: textColor,
+                  )
+                : ColorScheme.dark(
+                    primary: mainColor,
+                    onPrimary: Colors.white,
+                    onSurface: Colors.white,
+                  ),
             textButtonTheme: TextButtonThemeData(
               style: TextButton.styleFrom(
                 foregroundColor: mainColor,
@@ -114,7 +121,7 @@ class _NoteEditState extends ConsumerState<NoteEdit>
             'Title and content cannot be empty',
             style: GoogleFonts.montserrat(),
           ),
-          backgroundColor: Colors.red,
+          backgroundColor: deleteColor,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
@@ -170,7 +177,7 @@ class _NoteEditState extends ConsumerState<NoteEdit>
               'Error: ${e.toString()}',
               style: GoogleFonts.montserrat(),
             ),
-            backgroundColor: Colors.red,
+            backgroundColor: deleteColor,
           ),
         );
       }
@@ -179,6 +186,10 @@ class _NoteEditState extends ConsumerState<NoteEdit>
 
   @override
   Widget build(BuildContext context) {
+    // Get theme and media query data
+    final ThemeData theme = Theme.of(context);
+    final bool isDarkMode = theme.brightness == Brightness.dark;
+
     return LayoutBuilder(
       builder: (context, constraints) {
         // Responsive sizing calculations
@@ -201,31 +212,32 @@ class _NoteEditState extends ConsumerState<NoteEdit>
         }
 
         return Scaffold(
-          backgroundColor: Colors.white,
+          backgroundColor: theme.scaffoldBackgroundColor,
           appBar: AppBar(
-            backgroundColor: Colors.white,
+            scrolledUnderElevation: 0,
+            backgroundColor: theme.scaffoldBackgroundColor,
             title: Text(
               widget.note.id.isEmpty ? 'Add Task' : 'Edit Task',
               style: GoogleFonts.montserrat(
                 fontWeight: FontWeight.bold,
-                color: Colors.black,
-                fontSize: responsiveFontSize(18),
+                color: theme.textTheme.titleLarge?.color,
+                fontSize: responsiveFontSize(30),
               ),
             ),
             leading: IconButton(
-              icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+              icon: Icon(Icons.arrow_back_ios, color: theme.iconTheme.color),
               onPressed: () => Navigator.pop(context),
             ),
             elevation: 0,
             actions: [
-              if (!widget.note.id.isEmpty)
+              if (widget.note.id.isNotEmpty)
                 IconButton(
                   onPressed: () {
                     _confirmDelete(context);
                   },
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.delete_outline_rounded,
-                    color: Colors.red,
+                    color: deleteColor,
                   ),
                 ),
             ],
@@ -259,24 +271,24 @@ class _NoteEditState extends ConsumerState<NoteEdit>
 
                         // Task Date Selection
                         _buildSectionTitle(
-                            context, "Task Date", responsiveFontSize(16)),
+                            context, "Task Date", responsiveFontSize(20)),
                         SizedBox(height: verticalSpacing * 0.5),
                         _buildDateSelector(
-                            context, responsiveFontSize(16), maxWidth),
+                            context, responsiveFontSize(20), maxWidth),
                         SizedBox(height: verticalSpacing),
 
                         // Title Input
                         _buildSectionTitle(
-                            context, "Title", responsiveFontSize(16)),
+                            context, "Title", responsiveFontSize(20)),
                         SizedBox(height: verticalSpacing * 0.5),
-                        _buildTitleInput(context, responsiveFontSize(16)),
+                        _buildTitleInput(context, responsiveFontSize(20)),
                         SizedBox(height: verticalSpacing),
 
                         // Description Input
                         _buildSectionTitle(
-                            context, "Description", responsiveFontSize(16)),
+                            context, "Description", responsiveFontSize(20)),
                         SizedBox(height: verticalSpacing * 0.5),
-                        _buildDescriptionInput(context, responsiveFontSize(16)),
+                        _buildDescriptionInput(context, responsiveFontSize(20)),
                         SizedBox(height: verticalSpacing),
 
                         // Completed Task Checkbox
@@ -285,7 +297,7 @@ class _NoteEditState extends ConsumerState<NoteEdit>
 
                         // Save Button
                         _buildSaveButton(
-                            context, responsiveFontSize(18), maxWidth),
+                            context, responsiveFontSize(20), maxWidth),
                         SizedBox(height: verticalSpacing * 0.5),
                       ],
                     ),
@@ -302,10 +314,11 @@ class _NoteEditState extends ConsumerState<NoteEdit>
   // Helper methods to break down the build method
   Widget _buildSectionTitle(
       BuildContext context, String title, double fontSize) {
+    final ThemeData theme = Theme.of(context);
     return Text(
       title,
       style: GoogleFonts.montserrat(
-        color: Colors.black87,
+        color: theme.textTheme.bodyLarge?.color,
         fontSize: fontSize,
         fontWeight: FontWeight.w600,
       ),
@@ -314,6 +327,8 @@ class _NoteEditState extends ConsumerState<NoteEdit>
 
   Widget _buildDateSelector(
       BuildContext context, double fontSize, double maxWidth) {
+    final ThemeData theme = Theme.of(context);
+    final bool isDarkMode = theme.brightness == Brightness.dark;
     final formattedDate = DateFormat('MMM d, yyyy').format(_selectedDate);
 
     return GestureDetector(
@@ -323,9 +338,10 @@ class _NoteEditState extends ConsumerState<NoteEdit>
         padding: EdgeInsets.symmetric(
             horizontal: maxWidth > 600 ? 20 : 15, vertical: 15),
         decoration: BoxDecoration(
-          color: Colors.grey.shade50,
+          color: isDarkMode ? const Color(0xFF1E1E1E) : Colors.grey.shade50,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.shade300),
+          border: Border.all(
+              color: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300),
         ),
         child: Row(
           children: [
@@ -339,19 +355,19 @@ class _NoteEditState extends ConsumerState<NoteEdit>
               formattedDate,
               style: GoogleFonts.montserrat(
                 fontSize: fontSize,
-                color: Colors.black,
+                color: theme.textTheme.bodyLarge?.color,
               ),
             ),
             const Spacer(),
             Container(
               padding: const EdgeInsets.all(5),
               decoration: BoxDecoration(
-                color: Colors.grey.shade200,
+                color: isDarkMode ? Colors.grey.shade800 : Colors.grey.shade200,
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.edit_calendar,
-                color: Colors.grey.shade700,
+                color: isDarkMode ? Colors.grey.shade500 : Colors.grey.shade700,
                 size: 16,
               ),
             ),
@@ -362,18 +378,23 @@ class _NoteEditState extends ConsumerState<NoteEdit>
   }
 
   Widget _buildTitleInput(BuildContext context, double fontSize) {
+    final ThemeData theme = Theme.of(context);
+    final bool isDarkMode = theme.brightness == Brightness.dark;
+
     return TextFormField(
       style: GoogleFonts.montserrat(
-        color: Colors.black,
+        color: theme.textTheme.bodyLarge?.color,
         fontSize: fontSize,
       ),
       controller: _titleController,
       decoration: InputDecoration(
         filled: true,
-        fillColor: Colors.grey.shade50,
+        fillColor: isDarkMode ? const Color(0xFF1E1E1E) : Colors.grey.shade50,
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey.shade300, width: 1),
+          borderSide: BorderSide(
+              color: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300,
+              width: 1),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -384,7 +405,7 @@ class _NoteEditState extends ConsumerState<NoteEdit>
         ),
         hintText: 'Enter task title',
         hintStyle: GoogleFonts.montserrat(
-          color: Colors.grey,
+          color: isDarkMode ? Colors.grey.shade500 : Colors.grey,
           fontSize: fontSize,
         ),
         contentPadding:
@@ -394,19 +415,24 @@ class _NoteEditState extends ConsumerState<NoteEdit>
   }
 
   Widget _buildDescriptionInput(BuildContext context, double fontSize) {
+    final ThemeData theme = Theme.of(context);
+    final bool isDarkMode = theme.brightness == Brightness.dark;
+
     return TextField(
       style: GoogleFonts.montserrat(
-        color: Colors.black,
+        color: theme.textTheme.bodyLarge?.color,
         fontSize: fontSize,
       ),
       controller: _contentController,
       maxLines: 5,
       decoration: InputDecoration(
         filled: true,
-        fillColor: Colors.grey.shade50,
+        fillColor: isDarkMode ? const Color(0xFF1E1E1E) : Colors.grey.shade50,
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey.shade300, width: 1),
+          borderSide: BorderSide(
+              color: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300,
+              width: 1),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -417,7 +443,7 @@ class _NoteEditState extends ConsumerState<NoteEdit>
         ),
         hintText: 'Enter task description',
         hintStyle: GoogleFonts.montserrat(
-          color: Colors.grey,
+          color: isDarkMode ? Colors.grey.shade500 : Colors.grey,
           fontSize: fontSize,
         ),
         contentPadding:
@@ -427,11 +453,15 @@ class _NoteEditState extends ConsumerState<NoteEdit>
   }
 
   Widget _buildCompletedTaskToggle(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final bool isDarkMode = theme.brightness == Brightness.dark;
+
     return Container(
       decoration: BoxDecoration(
-        color: Colors.grey.shade50,
+        color: isDarkMode ? const Color(0xFF1E1E1E) : Colors.grey.shade50,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade300),
+        border: Border.all(
+            color: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300),
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
@@ -449,12 +479,17 @@ class _NoteEditState extends ConsumerState<NoteEdit>
                 child: Checkbox(
                   value: _isCompleted,
                   activeColor: completedTask,
+                  checkColor: isDarkMode ? Colors.black : Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(6),
                   ),
                   side: BorderSide(
                     width: 1.5,
-                    color: _isCompleted ? completedTask : Colors.grey.shade400,
+                    color: _isCompleted
+                        ? completedTask
+                        : (isDarkMode
+                            ? Colors.grey.shade600
+                            : Colors.grey.shade400),
                   ),
                   onChanged: (bool? value) {
                     setState(() {
@@ -467,14 +502,14 @@ class _NoteEditState extends ConsumerState<NoteEdit>
               Text(
                 'Mark as completed',
                 style: GoogleFonts.montserrat(
-                  color: Colors.black87,
+                  color: theme.textTheme.bodyLarge?.color,
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
                 ),
               ),
               if (_isCompleted) ...[
                 const SizedBox(width: 8),
-                const Icon(
+                Icon(
                   Icons.check_circle_outline,
                   color: completedTask,
                   size: 20,
@@ -523,11 +558,14 @@ class _NoteEditState extends ConsumerState<NoteEdit>
   }
 
   void _confirmDelete(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final bool isDarkMode = theme.brightness == Brightness.dark;
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          backgroundColor: Colors.white,
+          backgroundColor: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
@@ -535,18 +573,21 @@ class _NoteEditState extends ConsumerState<NoteEdit>
             'Delete Task',
             style: GoogleFonts.montserrat(
               fontWeight: FontWeight.bold,
+              color: theme.textTheme.titleLarge?.color,
             ),
           ),
           content: Text(
             'Are you sure you want to delete this task?',
-            style: GoogleFonts.montserrat(),
+            style: GoogleFonts.montserrat(
+              color: theme.textTheme.bodyLarge?.color,
+            ),
           ),
           actions: <Widget>[
             TextButton(
               child: Text(
                 'Cancel',
                 style: GoogleFonts.montserrat(
-                  color: Colors.black54,
+                  color: isDarkMode ? Colors.white70 : Colors.black54,
                 ),
               ),
               onPressed: () {
@@ -555,7 +596,7 @@ class _NoteEditState extends ConsumerState<NoteEdit>
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
+                backgroundColor: deleteColor,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),

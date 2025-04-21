@@ -9,7 +9,7 @@ import 'package:notes_app_solulab/provider/auth_provider.dart';
 import 'package:notes_app_solulab/provider/notes_provider.dart';
 
 class AddNoteScreen extends ConsumerStatefulWidget {
-  const AddNoteScreen({super.key});
+  const AddNoteScreen({Key? key}) : super(key: key);
 
   @override
   ConsumerState<AddNoteScreen> createState() => _AddNoteScreenState();
@@ -64,6 +64,7 @@ class _AddNoteScreenState extends ConsumerState<AddNoteScreen>
   }
 
   Future<void> _selectDate(BuildContext context) async {
+    final ThemeData theme = Theme.of(context);
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: _selectedDate,
@@ -71,12 +72,18 @@ class _AddNoteScreenState extends ConsumerState<AddNoteScreen>
       lastDate: DateTime(2101),
       builder: (context, child) {
         return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: mainColor,
-              onPrimary: Colors.white,
-              onSurface: Colors.black,
-            ),
+          data: theme.copyWith(
+            colorScheme: theme.brightness == Brightness.light
+                ? ColorScheme.light(
+                    primary: mainColor,
+                    onPrimary: Colors.white,
+                    onSurface: textColor,
+                  )
+                : ColorScheme.dark(
+                    primary: mainColor,
+                    onPrimary: Colors.white,
+                    onSurface: Colors.white,
+                  ),
             textButtonTheme: TextButtonThemeData(
               style: TextButton.styleFrom(
                 foregroundColor: mainColor,
@@ -106,7 +113,7 @@ class _AddNoteScreenState extends ConsumerState<AddNoteScreen>
             'Title and content cannot be empty',
             style: GoogleFonts.montserrat(),
           ),
-          backgroundColor: Colors.red,
+          backgroundColor: deleteColor,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
@@ -125,7 +132,7 @@ class _AddNoteScreenState extends ConsumerState<AddNoteScreen>
             'You need to be logged in to add notes',
             style: GoogleFonts.montserrat(),
           ),
-          backgroundColor: Colors.red,
+          backgroundColor: deleteColor,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
@@ -175,7 +182,7 @@ class _AddNoteScreenState extends ConsumerState<AddNoteScreen>
               'Error: ${e.toString()}',
               style: GoogleFonts.montserrat(),
             ),
-            backgroundColor: Colors.red,
+            backgroundColor: deleteColor,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
@@ -188,10 +195,13 @@ class _AddNoteScreenState extends ConsumerState<AddNoteScreen>
 
   @override
   Widget build(BuildContext context) {
-    // Use MediaQuery to get screen size
-    final size = MediaQuery.of(context).size;
+    // Get theme and media query data
+    final ThemeData theme = Theme.of(context);
+    final MediaQueryData mediaQuery = MediaQuery.of(context);
+    final size = mediaQuery.size;
     final width = size.width;
     final height = size.height;
+    final bool isDarkMode = theme.brightness == Brightness.dark;
 
     // Calculate responsive values based on screen size
     final bool isSmallScreen = width < 360;
@@ -273,7 +283,7 @@ class _AddNoteScreenState extends ConsumerState<AddNoteScreen>
             Text(
               "Task Date",
               style: GoogleFonts.montserrat(
-                color: Colors.black87,
+                color: theme.textTheme.bodyLarge?.color,
                 fontSize: labelFontSize,
                 fontWeight: FontWeight.w600,
               ),
@@ -288,9 +298,14 @@ class _AddNoteScreenState extends ConsumerState<AddNoteScreen>
                   vertical: height * 0.017,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade50,
+                  color: isDarkMode
+                      ? const Color(0xFF1E1E1E)
+                      : Colors.grey.shade50,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey.shade300),
+                  border: Border.all(
+                      color: isDarkMode
+                          ? Colors.grey.shade700
+                          : Colors.grey.shade300),
                 ),
                 child: Row(
                   children: [
@@ -304,19 +319,23 @@ class _AddNoteScreenState extends ConsumerState<AddNoteScreen>
                       formattedDate,
                       style: GoogleFonts.montserrat(
                         fontSize: contentFontSize,
-                        color: Colors.black,
+                        color: theme.textTheme.bodyLarge?.color,
                       ),
                     ),
                     const Spacer(),
                     Container(
                       padding: EdgeInsets.all(isSmallScreen ? 4 : 5),
                       decoration: BoxDecoration(
-                        color: Colors.grey.shade200,
+                        color: isDarkMode
+                            ? Colors.grey.shade800
+                            : Colors.grey.shade200,
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
                         Icons.edit_calendar,
-                        color: Colors.grey.shade700,
+                        color: isDarkMode
+                            ? Colors.grey.shade500
+                            : Colors.grey.shade700,
                         size: isSmallScreen ? 14 : 16,
                       ),
                     ),
@@ -330,7 +349,7 @@ class _AddNoteScreenState extends ConsumerState<AddNoteScreen>
             Text(
               "Title",
               style: GoogleFonts.montserrat(
-                color: Colors.black87,
+                color: theme.textTheme.bodyLarge?.color,
                 fontSize: labelFontSize,
                 fontWeight: FontWeight.w600,
               ),
@@ -338,27 +357,32 @@ class _AddNoteScreenState extends ConsumerState<AddNoteScreen>
             SizedBox(height: verticalSpacing * 0.5),
             TextFormField(
               style: GoogleFonts.montserrat(
-                color: Colors.black,
+                color: theme.textTheme.bodyLarge?.color,
                 fontSize: contentFontSize,
               ),
               controller: _titleController,
               decoration: InputDecoration(
                 filled: true,
-                fillColor: Colors.grey.shade50,
+                fillColor:
+                    isDarkMode ? const Color(0xFF1E1E1E) : Colors.grey.shade50,
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey.shade300, width: 1),
+                  borderSide: BorderSide(
+                      color: isDarkMode
+                          ? Colors.grey.shade700
+                          : Colors.grey.shade300,
+                      width: 1),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: mainColor, width: 1.5),
+                  borderSide: BorderSide(color: mainColor, width: 1.5),
                 ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
                 hintText: 'Enter task title',
                 hintStyle: GoogleFonts.montserrat(
-                  color: Colors.grey,
+                  color: isDarkMode ? Colors.grey.shade500 : Colors.grey,
                   fontSize: contentFontSize,
                 ),
                 contentPadding: EdgeInsets.symmetric(
@@ -373,7 +397,7 @@ class _AddNoteScreenState extends ConsumerState<AddNoteScreen>
             Text(
               "Description",
               style: GoogleFonts.montserrat(
-                color: Colors.black87,
+                color: theme.textTheme.bodyLarge?.color,
                 fontSize: labelFontSize,
                 fontWeight: FontWeight.w600,
               ),
@@ -381,28 +405,33 @@ class _AddNoteScreenState extends ConsumerState<AddNoteScreen>
             SizedBox(height: verticalSpacing * 0.5),
             TextField(
               style: GoogleFonts.montserrat(
-                color: Colors.black,
+                color: theme.textTheme.bodyLarge?.color,
                 fontSize: contentFontSize,
               ),
               controller: _contentController,
               maxLines: isLandscape ? 3 : 5,
               decoration: InputDecoration(
                 filled: true,
-                fillColor: Colors.grey.shade50,
+                fillColor:
+                    isDarkMode ? const Color(0xFF1E1E1E) : Colors.grey.shade50,
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey.shade300, width: 1),
+                  borderSide: BorderSide(
+                      color: isDarkMode
+                          ? Colors.grey.shade700
+                          : Colors.grey.shade300,
+                      width: 1),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: mainColor, width: 1.5),
+                  borderSide: BorderSide(color: mainColor, width: 1.5),
                 ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
                 hintText: 'Enter task description',
                 hintStyle: GoogleFonts.montserrat(
-                  color: Colors.grey,
+                  color: isDarkMode ? Colors.grey.shade500 : Colors.grey,
                   fontSize: contentFontSize,
                 ),
                 contentPadding: EdgeInsets.symmetric(
@@ -416,9 +445,13 @@ class _AddNoteScreenState extends ConsumerState<AddNoteScreen>
             // Completed checkbox
             Container(
               decoration: BoxDecoration(
-                color: Colors.grey.shade50,
+                color:
+                    isDarkMode ? const Color(0xFF1E1E1E) : Colors.grey.shade50,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey.shade300),
+                border: Border.all(
+                    color: isDarkMode
+                        ? Colors.grey.shade700
+                        : Colors.grey.shade300),
               ),
               child: InkWell(
                 borderRadius: BorderRadius.circular(12),
@@ -439,6 +472,7 @@ class _AddNoteScreenState extends ConsumerState<AddNoteScreen>
                         child: Checkbox(
                           value: _isCompleted,
                           activeColor: completedTask,
+                          checkColor: isDarkMode ? Colors.black : Colors.white,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(6),
                           ),
@@ -446,7 +480,9 @@ class _AddNoteScreenState extends ConsumerState<AddNoteScreen>
                             width: 1.5,
                             color: _isCompleted
                                 ? completedTask
-                                : Colors.grey.shade400,
+                                : (isDarkMode
+                                    ? Colors.grey.shade600
+                                    : Colors.grey.shade400),
                           ),
                           onChanged: (bool? value) {
                             setState(() {
@@ -459,7 +495,7 @@ class _AddNoteScreenState extends ConsumerState<AddNoteScreen>
                       Text(
                         'Mark as completed',
                         style: GoogleFonts.montserrat(
-                          color: Colors.black87,
+                          color: theme.textTheme.bodyLarge?.color,
                           fontSize: contentFontSize,
                           fontWeight: FontWeight.w500,
                         ),
@@ -518,21 +554,22 @@ class _AddNoteScreenState extends ConsumerState<AddNoteScreen>
     );
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        scrolledUnderElevation: 0,
+        backgroundColor: theme.scaffoldBackgroundColor,
         title: Text(
           'Add Task',
           style: GoogleFonts.montserrat(
             fontWeight: FontWeight.bold,
-            color: Colors.black,
+            color: theme.textTheme.titleLarge?.color,
             fontSize: isSmallScreen ? 18 : 20,
           ),
         ),
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back_ios,
-            color: Colors.black,
+            color: theme.iconTheme.color,
             size: isSmallScreen ? 18 : 24,
           ),
           onPressed: () => Navigator.pop(context),

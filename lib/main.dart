@@ -5,22 +5,40 @@ import 'package:notes_app_solulab/constants/appTheme.dart';
 import 'package:notes_app_solulab/core/supaBase_client.dart';
 import 'package:notes_app_solulab/provider/auth_provider.dart';
 import 'package:notes_app_solulab/screens/notes_list.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-// Theme Mode Provider
+// Theme Mode Provider with persistence
 final themeModeProvider =
     StateNotifierProvider<ThemeModeNotifier, ThemeMode>((ref) {
   return ThemeModeNotifier();
 });
 
 class ThemeModeNotifier extends StateNotifier<ThemeMode> {
-  ThemeModeNotifier() : super(ThemeMode.system);
+  ThemeModeNotifier() : super(ThemeMode.system) {
+    _loadThemeMode();
+  }
+
+  // Load saved theme mode from preferences
+  Future<void> _loadThemeMode() async {
+    final prefs = await SharedPreferences.getInstance();
+    final themeModeIndex = prefs.getInt('themeMode') ?? 0;
+    state = ThemeMode.values[themeModeIndex];
+  }
+
+  // Save theme mode to preferences
+  Future<void> _saveThemeMode(ThemeMode mode) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('themeMode', mode.index);
+  }
 
   void toggleTheme() {
     state = state == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
+    _saveThemeMode(state);
   }
 
   void setThemeMode(ThemeMode mode) {
     state = mode;
+    _saveThemeMode(state);
   }
 }
 
@@ -62,10 +80,10 @@ class AuthGate extends ConsumerStatefulWidget {
   const AuthGate({Key? key}) : super(key: key);
 
   @override
-  ConsumerState<AuthGate> createState() => _AuthGateState();
+  ConsumerState createState() => _AuthGateState();
 }
 
-class _AuthGateState extends ConsumerState<AuthGate> {
+class _AuthGateState extends ConsumerState {
   @override
   void initState() {
     super.initState();

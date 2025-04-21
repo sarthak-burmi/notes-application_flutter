@@ -100,13 +100,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
         setState(() {});
       }
     } catch (e) {
-      // Error handling code...
+      setState(() {
+        _errorMessage = e.toString();
+        _isLoading = false;
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // Get responsive measurements
+    // Get theme and responsive measurements
+    final ThemeData theme = Theme.of(context);
+    final bool isDarkMode = theme.brightness == Brightness.dark;
     final mediaQuery = MediaQuery.of(context);
     final height = mediaQuery.size.height;
     final width = mediaQuery.size.width;
@@ -117,7 +122,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     final textScaleFactor = mediaQuery.textScaleFactor.clamp(0.8, 1.2);
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: LayoutBuilder(builder: (context, constraints) {
           // Responsive spacing calculation
@@ -144,7 +149,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                         style: GoogleFonts.montserrat(
                           fontWeight: FontWeight.bold,
                           fontSize: isSmallScreen ? 18 : 22,
-                          color: Colors.black87,
+                          color: theme.textTheme.titleLarge?.color,
                         ),
                       ),
                       SizedBox(height: verticalSpacing),
@@ -154,8 +159,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                         alignment: Alignment.centerLeft,
                         child: RichText(
                           text: TextSpan(
-                            style: const TextStyle(
-                              color: Colors.black,
+                            style: TextStyle(
+                              color: theme.textTheme.bodyLarge?.color,
                             ),
                             children: [
                               TextSpan(
@@ -171,7 +176,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                 style: GoogleFonts.montserrat(
                                   fontWeight: FontWeight.bold,
                                   fontSize: isSmallScreen ? 28 : 32,
-                                  color: Colors.black87,
+                                  color: theme.textTheme.titleLarge?.color,
                                 ),
                               ),
                             ],
@@ -196,21 +201,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                         Container(
                           padding: EdgeInsets.all(isSmallScreen ? 8 : 12),
                           decoration: BoxDecoration(
-                            color: Colors.red.withOpacity(0.1),
+                            color: deleteColor.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(10),
                             border:
-                                Border.all(color: Colors.red.withOpacity(0.3)),
+                                Border.all(color: deleteColor.withOpacity(0.3)),
                           ),
                           child: Row(
                             children: [
-                              const Icon(Icons.error_outline,
-                                  color: Colors.red, size: 20),
+                              Icon(Icons.error_outline,
+                                  color: deleteColor, size: 20),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
                                   _errorMessage!,
                                   style: GoogleFonts.montserrat(
-                                    color: Colors.red,
+                                    color: deleteColor,
                                     fontSize: 14 * textScaleFactor,
                                   ),
                                 ),
@@ -226,7 +231,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                         style: GoogleFonts.montserrat(
                           fontWeight: FontWeight.w600,
                           fontSize: 14 * textScaleFactor,
-                          color: Colors.black87,
+                          color: theme.textTheme.bodyLarge?.color,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -234,26 +239,34 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
                         style: GoogleFonts.montserrat(
-                            fontSize: 15 * textScaleFactor),
+                          fontSize: 15 * textScaleFactor,
+                          color: theme.textTheme.bodyLarge?.color,
+                        ),
                         decoration: InputDecoration(
                           hintText: 'Enter your email',
                           hintStyle: GoogleFonts.montserrat(
                             fontSize: 14 * textScaleFactor,
-                            color: Colors.grey,
+                            color:
+                                isDarkMode ? Colors.grey.shade500 : Colors.grey,
                           ),
                           filled: true,
-                          fillColor: Colors.grey.shade50,
-                          prefixIcon: const Icon(Icons.email_outlined,
-                              color: mainColor),
+                          fillColor: isDarkMode
+                              ? const Color(0xFF1E1E1E)
+                              : Colors.grey.shade50,
+                          prefixIcon:
+                              Icon(Icons.email_outlined, color: mainColor),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide(
-                                color: Colors.grey.shade300, width: 1),
+                                color: isDarkMode
+                                    ? Colors.grey.shade700
+                                    : Colors.grey.shade300,
+                                width: 1),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide:
-                                const BorderSide(color: mainColor, width: 1.5),
+                                BorderSide(color: mainColor, width: 1.5),
                           ),
                           contentPadding: EdgeInsets.symmetric(
                             vertical: isSmallScreen ? 12 : 16,
@@ -267,7 +280,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                         style: GoogleFonts.montserrat(
                           fontWeight: FontWeight.w600,
                           fontSize: 14 * textScaleFactor,
-                          color: Colors.black87,
+                          color: theme.textTheme.bodyLarge?.color,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -275,23 +288,30 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                         controller: _passwordController,
                         obscureText: _obscurePassword,
                         style: GoogleFonts.montserrat(
-                            fontSize: 15 * textScaleFactor),
+                          fontSize: 15 * textScaleFactor,
+                          color: theme.textTheme.bodyLarge?.color,
+                        ),
                         decoration: InputDecoration(
                           hintText: 'Enter your password',
                           hintStyle: GoogleFonts.montserrat(
                             fontSize: 14 * textScaleFactor,
-                            color: Colors.grey,
+                            color:
+                                isDarkMode ? Colors.grey.shade500 : Colors.grey,
                           ),
                           filled: true,
-                          fillColor: Colors.grey.shade50,
+                          fillColor: isDarkMode
+                              ? const Color(0xFF1E1E1E)
+                              : Colors.grey.shade50,
                           prefixIcon:
-                              const Icon(Icons.lock_outline, color: mainColor),
+                              Icon(Icons.lock_outline, color: mainColor),
                           suffixIcon: IconButton(
                             icon: Icon(
                               _obscurePassword
                                   ? Icons.visibility_off_outlined
                                   : Icons.visibility_outlined,
-                              color: Colors.grey,
+                              color: isDarkMode
+                                  ? Colors.grey.shade500
+                                  : Colors.grey,
                             ),
                             onPressed: () {
                               setState(() {
@@ -302,12 +322,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide(
-                                color: Colors.grey.shade300, width: 1),
+                                color: isDarkMode
+                                    ? Colors.grey.shade700
+                                    : Colors.grey.shade300,
+                                width: 1),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide:
-                                const BorderSide(color: mainColor, width: 1.5),
+                                BorderSide(color: mainColor, width: 1.5),
                           ),
                           contentPadding: EdgeInsets.symmetric(
                             vertical: isSmallScreen ? 12 : 16,
@@ -371,7 +394,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                             Text(
                               "Don't have an account?",
                               style: GoogleFonts.montserrat(
-                                color: Colors.black54,
+                                color: isDarkMode
+                                    ? Colors.white54
+                                    : Colors.black54,
                                 fontSize: 14 * textScaleFactor,
                               ),
                             ),

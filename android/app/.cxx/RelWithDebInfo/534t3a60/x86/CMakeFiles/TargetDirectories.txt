@@ -1,0 +1,2 @@
+/Users/sarthakburmi/Documents/coding/flutter/notes-application_flutter/android/app/.cxx/RelWithDebInfo/534t3a60/x86/CMakeFiles/edit_cache.dir
+/Users/sarthakburmi/Documents/coding/flutter/notes-application_flutter/android/app/.cxx/RelWithDebInfo/534t3a60/x86/CMakeFiles/rebuild_cache.dir
