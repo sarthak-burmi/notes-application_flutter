@@ -103,6 +103,7 @@ class AuthController {
 
   Future<void> signOut() async {
     await _supabase.auth.signOut();
+    _ref.read(authStateProvider.notifier).updateAuthState();
   }
 
   Future<void> updateUserMetadata(Map<String, dynamic> metadata) async {

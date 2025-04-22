@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:notes_app_solulab/authentication/Login.dart';
 import 'package:notes_app_solulab/constants/colors.dart';
 import 'package:notes_app_solulab/functions/auth_provider.dart';
+import 'package:notes_app_solulab/screens/task_list.dart';
 
 class CreateAccountScreen extends ConsumerStatefulWidget {
   const CreateAccountScreen({Key? key}) : super(key: key);
@@ -113,6 +114,16 @@ class _CreateAccountScreenState extends ConsumerState<CreateAccountScreen>
         });
       }
 
+      // Automatically sign in after successful registration
+      await ref.read(authControllerProvider).signIn(email, password);
+
+      // Force auth state update
+      ref.read(authStateProvider.notifier).updateAuthState();
+
+      // Invalidate the userMetadataProvider to refresh user data
+      ref.invalidate(userMetadataProvider);
+
+      // Show success message
       Fluttertoast.showToast(
         msg: "Account Created Successfully!",
         toastLength: Toast.LENGTH_SHORT,
@@ -123,10 +134,13 @@ class _CreateAccountScreenState extends ConsumerState<CreateAccountScreen>
         fontSize: 16.0,
       );
 
-      // Automatically sign in after successful registration
-      await ref.read(authControllerProvider).signIn(email, password);
-
-      // No need to navigate, the AuthGate will handle it
+      // Navigate to NoteList and remove all previous routes
+      if (mounted) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const NoteList()),
+          (route) => false, // This removes all previous routes from the stack
+        );
+      }
     } catch (e) {
       setState(() {
         _errorMessage = e.toString();

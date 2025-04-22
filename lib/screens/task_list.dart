@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:notes_app_solulab/authentication/Login.dart';
 import 'package:notes_app_solulab/constants/colors.dart';
 import 'package:notes_app_solulab/constants/timeGreeting.dart';
 import 'package:notes_app_solulab/functions/auth_provider.dart';
@@ -195,6 +196,15 @@ class _NoteListState extends ConsumerState<NoteList> {
                       onPressed: () async {
                         try {
                           await ref.read(authControllerProvider).signOut();
+
+                          // Force navigation to login screen
+                          Navigator.of(context).pushAndRemoveUntil(
+                            MaterialPageRoute(
+                                builder: (context) => const LoginScreen()),
+                            (route) =>
+                                false, // This removes all previous routes
+                          );
+
                           Fluttertoast.showToast(
                             msg: "Logged Out Successfully",
                             toastLength: Toast.LENGTH_SHORT,
@@ -205,7 +215,6 @@ class _NoteListState extends ConsumerState<NoteList> {
                             textColor: Colors.white,
                             fontSize: 16.0,
                           );
-                          // AuthGate will handle navigation
                         } catch (e) {
                           Fluttertoast.showToast(
                             msg: "Error logging out: ${e.toString()}",
@@ -778,9 +787,9 @@ class _NoteListState extends ConsumerState<NoteList> {
                                   fontSize: isSmallScreen ? 12 : 14,
                                   color: note.isCompleted
                                       ? (isDarkMode
-                                          ? Colors.grey.shade500
-                                          : Colors.grey)
-                                      : theme.textTheme.bodyMedium?.color,
+                                          ? Colors.white
+                                          : Colors.black)
+                                      : theme.textTheme.bodyLarge?.color,
                                   decoration: note.isCompleted
                                       ? TextDecoration.lineThrough
                                       : TextDecoration.none,
@@ -810,8 +819,8 @@ class _NoteListState extends ConsumerState<NoteList> {
                                           style: GoogleFonts.montserrat(
                                             fontSize: isSmallScreen ? 10 : 12,
                                             color: isDarkMode
-                                                ? Colors.grey.shade400
-                                                : Colors.grey,
+                                                ? Colors.white
+                                                : Colors.black,
                                           ),
                                           overflow: TextOverflow.ellipsis,
                                         ),
@@ -825,8 +834,8 @@ class _NoteListState extends ConsumerState<NoteList> {
                                         Icons.access_time_rounded,
                                         size: isSmallScreen ? 10 : 12,
                                         color: isDarkMode
-                                            ? Colors.grey.shade400
-                                            : Colors.grey,
+                                            ? Colors.white
+                                            : Colors.black,
                                       ),
                                       SizedBox(width: isSmallScreen ? 2 : 4),
                                       Flexible(
@@ -835,8 +844,8 @@ class _NoteListState extends ConsumerState<NoteList> {
                                           style: GoogleFonts.montserrat(
                                             fontSize: isSmallScreen ? 10 : 12,
                                             color: isDarkMode
-                                                ? Colors.grey.shade400
-                                                : Colors.grey,
+                                                ? Colors.white
+                                                : Colors.black,
                                           ),
                                           overflow: TextOverflow.ellipsis,
                                         ),
@@ -1002,7 +1011,6 @@ class _NoteListState extends ConsumerState<NoteList> {
   Widget _buildTaskList(BuildContext context, WidgetRef ref, List<Task> notes,
       bool isLoading, bool isSmallScreen) {
     final theme = Theme.of(context);
-    final isDarkMode = theme.brightness == Brightness.dark;
 
     if (isLoading) {
       return const Center(

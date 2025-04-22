@@ -5,6 +5,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:notes_app_solulab/authentication/CreateAccout.dart';
 import 'package:notes_app_solulab/constants/colors.dart';
 import 'package:notes_app_solulab/functions/auth_provider.dart';
+import 'package:notes_app_solulab/screens/task_list.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -81,6 +82,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
       // IMPORTANT: Force auth state update
       ref.read(authStateProvider.notifier).updateAuthState();
 
+      // Refresh user metadata
+      ref.invalidate(userMetadataProvider);
+
       // Check current auth state after login
       final authState = ref.read(authStateProvider);
       print("Current auth state after login update: $authState");
@@ -95,9 +99,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
         fontSize: 16.0,
       );
 
-      // Force UI update
+      // Force explicit navigation to NoteList
       if (mounted) {
-        setState(() {});
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const NoteList()),
+          (route) => false, // This removes all previous routes from the stack
+        );
       }
     } catch (e) {
       setState(() {
