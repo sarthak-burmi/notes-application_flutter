@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:notes_app_solulab/autherntication/Login.dart';
+import 'package:notes_app_solulab/authentication/Login.dart';
 import 'package:notes_app_solulab/constants/colors.dart';
-import 'package:notes_app_solulab/provider/auth_provider.dart';
+import 'package:notes_app_solulab/functions/auth_provider.dart';
 
 class CreateAccountScreen extends ConsumerStatefulWidget {
   const CreateAccountScreen({Key? key}) : super(key: key);

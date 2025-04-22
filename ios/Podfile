@@ -1,6 +1,5 @@
 # Uncomment this line to define a global platform for your project
 platform :ios, '14.0'
-
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
 
@@ -24,19 +23,15 @@ def flutter_root
 end
 
 require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelper'), flutter_root)
-
 flutter_ios_podfile_setup
 
 target 'Runner' do
   use_frameworks!
   use_modular_headers!
-
-  pod 'Firebase/Core'
-  pod 'Firebase/Auth'
-  pod 'Firebase/Firestore', '10.25.0' # Specify the version here
-
-  flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
   
+  # Remove all Firebase references
+  
+  flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
   target 'RunnerTests' do
     inherit! :search_paths
   end
@@ -45,5 +40,11 @@ end
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
+    
+    # Add these lines to fix architecture and build issues
+    target.build_configurations.each do |config|
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '14.0'
+      config.build_settings["EXCLUDED_ARCHS[sdk=iphonesimulator*]"] = "arm64"
+    end
   end
 end

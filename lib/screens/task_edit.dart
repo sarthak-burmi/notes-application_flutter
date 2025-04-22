@@ -4,11 +4,11 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:notes_app_solulab/constants/colors.dart';
-import 'package:notes_app_solulab/model/notesModel.dart';
-import 'package:notes_app_solulab/provider/notes_provider.dart';
+import 'package:notes_app_solulab/functions/task_provider.dart';
+import 'package:notes_app_solulab/model/TaskModel.dart';
 
 class NoteEdit extends ConsumerStatefulWidget {
-  final Note note;
+  final Task note;
 
   const NoteEdit({Key? key, required this.note}) : super(key: key);
 
@@ -34,7 +34,6 @@ class _NoteEditState extends ConsumerState<NoteEdit>
     _contentController = TextEditingController(text: widget.note.content);
     _isCompleted = widget.note.isCompleted;
 
-    // Parse the task date or use current date
     _selectedDate = DateTime.tryParse(widget.note.taskDate) ?? DateTime.now();
 
     _animationController = AnimationController(
@@ -70,7 +69,6 @@ class _NoteEditState extends ConsumerState<NoteEdit>
     super.dispose();
   }
 
-  // Date selection method
   Future<void> _selectDate(BuildContext context) async {
     final ThemeData theme = Theme.of(context);
     final DateTime? picked = await showDatePicker(
@@ -139,13 +137,12 @@ class _NoteEditState extends ConsumerState<NoteEdit>
       title: title,
       content: content,
       isCompleted: _isCompleted,
-      taskDate: _selectedDate.toIso8601String(), // Update task date
+      taskDate: _selectedDate.toIso8601String(),
     );
 
     try {
       if (widget.note.id.isEmpty) {
-        // Add new note
-        await ref.read(notesProvider.notifier).addNote(updatedNote);
+        await ref.read(taskProvider.notifier).addNote(updatedNote);
         if (mounted) {
           Fluttertoast.showToast(
             msg: "Task added successfully",
@@ -154,7 +151,7 @@ class _NoteEditState extends ConsumerState<NoteEdit>
         }
       } else {
         // Update existing note
-        await ref.read(notesProvider.notifier).updateNote(updatedNote);
+        await ref.read(taskProvider.notifier).updateNote(updatedNote);
         if (mounted) {
           Fluttertoast.showToast(
             msg: "Task updated successfully",
@@ -609,7 +606,7 @@ class _NoteEditState extends ConsumerState<NoteEdit>
               ),
               onPressed: () async {
                 await ref
-                    .read(notesProvider.notifier)
+                    .read(taskProvider.notifier)
                     .deleteNote(widget.note.id);
                 if (mounted) {
                   Navigator.of(context).pop();

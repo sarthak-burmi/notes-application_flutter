@@ -1,4 +1,4 @@
-class Note {
+class Task {
   String id;
   String title;
   String content;
@@ -6,9 +6,9 @@ class Note {
   bool isCompleted;
   String createdAt;
   String updatedAt;
-  String taskDate; // Added field for task date
+  String taskDate;
 
-  Note({
+  Task({
     required this.id,
     required this.title,
     required this.content,
@@ -21,8 +21,8 @@ class Note {
         this.updatedAt = updatedAt ?? DateTime.now().toIso8601String(),
         this.taskDate = taskDate ?? DateTime.now().toIso8601String();
 
-  factory Note.fromMap(Map<String, dynamic> data, String documentId) {
-    return Note(
+  factory Task.fromMap(Map<String, dynamic> data, String documentId) {
+    return Task(
       id: documentId,
       title: data['title'] ?? '',
       content: data['content'] ?? '',
@@ -48,7 +48,7 @@ class Note {
     };
   }
 
-  Note copyWith({
+  Task copyWith({
     String? id,
     String? title,
     String? content,
@@ -58,7 +58,7 @@ class Note {
     String? updatedAt,
     String? taskDate,
   }) {
-    return Note(
+    return Task(
       id: id ?? this.id,
       title: title ?? this.title,
       content: content ?? this.content,

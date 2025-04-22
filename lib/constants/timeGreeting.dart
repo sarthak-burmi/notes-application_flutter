@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'package:notes_app_solulab/provider/auth_provider.dart';
+import 'package:notes_app_solulab/functions/auth_provider.dart';
 
 class TimeGreetingScreen extends ConsumerWidget {
   const TimeGreetingScreen({Key? key}) : super(key: key);
@@ -17,11 +17,9 @@ class TimeGreetingScreen extends ConsumerWidget {
     String formattedDate = DateFormat('MMMM d, yyyy').format(now);
     String weekday = DateFormat('EEEE').format(now);
 
-    // Get screen size for responsive layout
     final screenSize = MediaQuery.of(context).size;
     final isSmallScreen = screenSize.width < 360;
 
-    // Get theme colors instead of hardcoding
     final textTheme = Theme.of(context).textTheme;
     final primaryColor = Theme.of(context).primaryColor;
     final isLightMode = Theme.of(context).brightness == Brightness.light;
@@ -38,7 +36,6 @@ class TimeGreetingScreen extends ConsumerWidget {
                     child: Text(
                       greeting,
                       style: GoogleFonts.montserrat(
-                        // Use theme text color instead of hardcoded black
                         color: textTheme.displayLarge?.color,
                         fontSize: isSmallScreen ? 16 : 18,
                         fontWeight: FontWeight.w600,
@@ -61,7 +58,6 @@ class TimeGreetingScreen extends ConsumerWidget {
                   Icon(
                     Icons.calendar_today_rounded,
                     size: 14,
-                    // Use secondary text color from theme
                     color: textTheme.bodyMedium?.color,
                   ),
                   const SizedBox(width: 4),
@@ -69,7 +65,6 @@ class TimeGreetingScreen extends ConsumerWidget {
                     child: Text(
                       "$formattedDate, $weekday",
                       style: GoogleFonts.montserrat(
-                        // Use secondary text color from theme
                         color: textTheme.bodyMedium?.color,
                         fontSize: isSmallScreen ? 10 : 12,
                         fontWeight: FontWeight.w500,
@@ -107,15 +102,15 @@ class TimeGreetingScreen extends ConsumerWidget {
 
   String _getEmoji(int hour) {
     if (hour < 6) {
-      return '🌙'; // Night
+      return '🌙';
     } else if (hour < 12) {
-      return '☀️'; // Morning
+      return '☀️';
     } else if (hour < 17) {
-      return '🌤️'; // Afternoon
+      return '🌤️';
     } else if (hour < 20) {
-      return '🌇'; // Evening
+      return '🌇';
     } else {
-      return '🌃'; // Night
+      return '🌃';
     }
   }
 }

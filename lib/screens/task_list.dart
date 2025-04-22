@@ -6,12 +6,12 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:notes_app_solulab/constants/colors.dart';
 import 'package:notes_app_solulab/constants/timeGreeting.dart';
+import 'package:notes_app_solulab/functions/auth_provider.dart';
+import 'package:notes_app_solulab/functions/task_provider.dart';
 import 'package:notes_app_solulab/main.dart';
-import 'package:notes_app_solulab/model/notesModel.dart';
-import 'package:notes_app_solulab/provider/auth_provider.dart';
-import 'package:notes_app_solulab/provider/notes_provider.dart';
-import 'package:notes_app_solulab/screens/add_note.dart';
-import 'package:notes_app_solulab/screens/notes_edit.dart';
+import 'package:notes_app_solulab/model/TaskModel.dart';
+import 'package:notes_app_solulab/screens/add_task.dart';
+import 'package:notes_app_solulab/screens/task_edit.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
@@ -50,7 +50,7 @@ class _NoteListState extends ConsumerState<NoteList> {
     }
   }
 
-  bool _isSelectedDate(Note note) {
+  bool _isSelectedDate(Task note) {
     if (_showAllTasks) return true; // Show all tasks regardless of date
 
     if (_selectedDate == null) return true;
@@ -93,7 +93,6 @@ class _NoteListState extends ConsumerState<NoteList> {
     // Determine breakpoints
     final isSmallScreen = width < 360;
     final isMediumScreen = width >= 360 && width < 600;
-    final isLargeScreen = width >= 600;
 
     // Adjust horizontal padding based on screen size
     final horizontalPadding = isSmallScreen
@@ -101,21 +100,17 @@ class _NoteListState extends ConsumerState<NoteList> {
         : (isMediumScreen ? width * 0.05 : width * 0.07);
 
     final authUser = ref.watch(authUserProvider).value;
-    final notesState = ref.watch(notesProvider);
+    final taskState = ref.watch(taskProvider);
     final userMetadata = ref.watch(userMetadataProvider).valueOrNull ?? {};
 
-    DateTime now = DateTime.now();
-    String formattedDate = DateFormat('MMMM d, yyyy').format(now);
-    String weekday = DateFormat('EEEE').format(now);
-
     // Filter notes by selected date using task date
-    final filteredNotes =
-        notesState.notes.where((note) => _isSelectedDate(note)).toList();
+    final filteredTasks =
+        taskState.notes.where((note) => _isSelectedDate(note)).toList();
 
     // Calculate task statistics
-    final totalTasks = filteredNotes.length;
+    final totalTasks = filteredTasks.length;
     final completedTasks =
-        filteredNotes.where((note) => note.isCompleted).length;
+        filteredTasks.where((note) => note.isCompleted).length;
 
     if (authUser == null) {
       return Scaffold(
@@ -127,7 +122,7 @@ class _NoteListState extends ConsumerState<NoteList> {
       );
     }
 
-    if (notesState.isLoading) {
+    if (taskState.isLoading) {
       return Scaffold(
         backgroundColor: theme.scaffoldBackgroundColor,
         body: Center(
@@ -369,15 +364,15 @@ class _NoteListState extends ConsumerState<NoteList> {
               child: Padding(
                 padding:
                     EdgeInsets.symmetric(horizontal: horizontalPadding * 0.8),
-                child: _buildNotesList(
+                child: _buildTaskList(
                   context,
                   ref,
-                  filteredNotes,
-                  notesState.isLoading,
+                  filteredTasks,
+                  taskState.isLoading,
                   isSmallScreen,
                 ),
-                // child: _buildNotesList(context, ref, filteredNotes,
-                //     notesState.isLoading, isSmallScreen, theme, isDarkMode),
+                // child: _buildTaskList(context, ref, filteredTasks,
+                //     taskState.isLoading, isSmallScreen, theme, isDarkMode),
               ),
             ),
           ],
@@ -638,7 +633,7 @@ class _NoteListState extends ConsumerState<NoteList> {
   }
 
   Widget _buildNoteItem(
-      BuildContext context, WidgetRef ref, Note note, bool isSmallScreen) {
+      BuildContext context, WidgetRef ref, Task note, bool isSmallScreen) {
     final theme = Theme.of(context);
     final isDarkMode = theme.brightness == Brightness.dark;
 
@@ -749,7 +744,7 @@ class _NoteListState extends ConsumerState<NoteList> {
                             ),
                             onChanged: (bool? value) {
                               ref
-                                  .read(notesProvider.notifier)
+                                  .read(taskProvider.notifier)
                                   .toggleNoteCompletion(note);
                             },
                           ),
@@ -951,7 +946,7 @@ class _NoteListState extends ConsumerState<NoteList> {
                 ),
               ),
               onPressed: () {
-                ref.read(notesProvider.notifier).deleteNote(noteId);
+                ref.read(taskProvider.notifier).deleteNote(noteId);
                 Navigator.of(context).pop();
                 Fluttertoast.showToast(
                   msg: "Task deleted successfully",
@@ -992,7 +987,7 @@ class _NoteListState extends ConsumerState<NoteList> {
         onPressed: () => Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => AddNoteScreen(),
+            builder: (context) => AddTaskScreen(),
           ),
         ),
         child: Icon(
@@ -1004,7 +999,7 @@ class _NoteListState extends ConsumerState<NoteList> {
     );
   }
 
-  Widget _buildNotesList(BuildContext context, WidgetRef ref, List<Note> notes,
+  Widget _buildTaskList(BuildContext context, WidgetRef ref, List<Task> notes,
       bool isLoading, bool isSmallScreen) {
     final theme = Theme.of(context);
     final isDarkMode = theme.brightness == Brightness.dark;

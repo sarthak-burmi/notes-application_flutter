@@ -1,79 +1,151 @@
-Flutter Firebase Note-Taking App
+# TaskHub - Flutter Task Management App
 
-A simple note-taking application built using Flutter with Firebase Authentication and Firestore for data storage.
+<div align="center">
+  <img src="android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png" alt="TaskHub Logo" width="200"/>
+</div>
 
-Table of Contents
+## Overview
 
-Introduction
-Features
-Screenshots
-Setup
-Firebase Setup
-Flutter Setup
-Usage
-Contributing
-License
-Introduction
+TaskHub is a modern, responsive task management application built with Flutter and Supabase. It features a clean, intuitive UI with both light and dark themes, user authentication, and real-time task synchronization.
 
-This Flutter application allows users to create, edit, and delete notes. It uses Firebase Authentication for email and password authentication and Firestore for storing notes. The app provides a simple and intuitive user interface for managing notes.
+## Features
 
-Features
+### Authentication
 
-User authentication with email and password.
-Add, edit, and delete notes.
-List view of notes with tapping to edit or delete.
-Persistent storage of notes using Firestore.
-Screenshots
+- Email/password sign-up and login
+- Persistent login sessions
+- User profile with customizable name
 
-Insert screenshots of your app here.
+### Task Management
 
-Setup
+- Create, edit, and delete tasks
+- Mark tasks as completed
+- Set due dates for tasks
+- Filter tasks by date
+- View all tasks or filter by selected date
 
-Firebase Setup
-Create a Firebase project:
+### UI/UX
 
-Go to the Firebase Console.
-Click on "Add project" and follow the steps to create a new project.
-Add Firebase to your Flutter app:
+- Smooth animations and transitions
+- Swipe actions for task management
+- Date selector for quick navigation
 
-Follow the instructions to add Firebase to your Flutter app.
-Enable Firebase Authentication:
+### Theming
 
-In the Firebase console, navigate to Authentication > Sign-in method.
-Enable Email/Password sign-in method.
-Set up Firestore:
+- Light and dark theme support
+- System theme detection
+- Manual theme switching with persistent selection
 
-In the Firebase console, navigate to Firestore Database.
-Create a Firestore database and set up your rules.
-Flutter Setup
-Clone the repository:
+## Screenshots
 
-bash
-Copy code
-git clone <repository-url>
-cd <project-folder>
-Install dependencies:
+<div align="center">
+  <div style="display: flex; flex-direction: row;">
+    <img src="screenshots/login.png" alt="Login Screen" width="200"/>
+    <img src="screenshots/task_list.png" alt="Task List" width="200"/>
+    <img src="screenshots/add_task.png" alt="Add Task" width="200"/>
+     <img src="screenshots/edit_task.png" alt="Add Task" width="200"/>
+    <img src="screenshots/task_list.png" alt="Dark Mode" width="200"/>
+  </div>
+</div>
 
-bash
-Copy code
-flutter pub get
-Run the app:
+## Technology Stack
 
-bash
-Copy code
-flutter run
-Usage
+- **Framework**: Flutter
+- **State Management**: Riverpod
+- **Backend**: Supabase (Authentication, Database)
+- **Styling**: Google Fonts, Custom Themes
+- **Animations**: Flutter Staggered Animations
+- **UI Components**: Flutter Slidable, Custom Cards
 
-Sign Up/Login:
-Upon launching the app, users will be prompted to sign up or log in using their email and password.
+## Project Structure
 
-Add a Note:
-Tap on the "+" button to add a new note. Enter the note content and tap "Save".
+```
+lib/
+├── authentication/
+│   ├── Login.dart
+│   └── CreateAccount.dart
+├── constants/
+│   ├── colors.dart
+│   ├── appTheme.dart
+│   └── timeGreeting.dart
+├── core/
+│   └── supaBase_client.dart
+├── model/
+│   └── TaskModel.dart
+├── provider/
+│   ├── auth_provider.dart
+│   └── task_provider.dart
+├── screens/
+│   ├── add_task.dart
+│   ├── task_edit.dart
+│   └── task_list.dart
+└── main.dart
+```
 
-Edit/Delete a Note:
-Tap on a note in the list to edit or delete it.
+## Getting Started
 
-Logout:
-Tap on the logout button to sign out from the app.
+### Prerequisites
 
+- Flutter SDK (latest version recommended)
+- Dart SDK
+- Supabase account and project
 
+### Installation
+
+1. Clone the repository:
+
+   ```
+   git clone https://github.com/yourusername/taskhub.git
+   ```
+
+2. Navigate to the project directory and install dependencies:
+
+   ```
+   cd taskhub
+   flutter pub get
+   ```
+
+3. Configure Supabase:
+
+   - Create a Supabase project
+   - Update the Supabase URL and anon key in `lib/core/supabase_client_sample.dart`
+   - Set up the required tables in Supabase:
+     - `users` table with `id`, `email`, and `name` fields
+     - `notes` table with `id`, `title`, `content`, `owner_id`, `is_completed`, `created_at`, `updated_at`, and `task_date` fields
+
+4. Run the application:
+   ```
+   flutter run
+   ```
+
+## Database Schema
+
+### Users Table
+
+| Column | Type      |
+| ------ | --------- |
+| id     | UUID (PK) |
+| email  | String    |
+| name   | String    |
+
+### Notes Table
+
+| Column       | Type                 |
+| ------------ | -------------------- |
+| id           | UUID (PK)            |
+| title        | String               |
+| content      | String               |
+| owner_id     | UUID (FK → users.id) |
+| is_completed | Boolean              |
+| created_at   | Timestamp            |
+| updated_at   | Timestamp            |
+| task_date    | Timestamp            |
+
+## Acknowledgements
+
+- [Flutter](https://flutter.dev)
+- [Riverpod](https://riverpod.dev)
+- [Supabase](https://supabase.io)
+- [Google Fonts](https://fonts.google.com)
+- [Flutter Staggered Animations](https://pub.dev/packages/flutter_staggered_animations)
+- [Flutter Slidable](https://pub.dev/packages/flutter_slidable)

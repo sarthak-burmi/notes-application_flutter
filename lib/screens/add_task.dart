@@ -4,18 +4,18 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:notes_app_solulab/constants/colors.dart';
-import 'package:notes_app_solulab/model/notesModel.dart';
-import 'package:notes_app_solulab/provider/auth_provider.dart';
-import 'package:notes_app_solulab/provider/notes_provider.dart';
+import 'package:notes_app_solulab/functions/auth_provider.dart';
+import 'package:notes_app_solulab/functions/task_provider.dart';
+import 'package:notes_app_solulab/model/TaskModel.dart';
 
-class AddNoteScreen extends ConsumerStatefulWidget {
-  const AddNoteScreen({Key? key}) : super(key: key);
+class AddTaskScreen extends ConsumerStatefulWidget {
+  const AddTaskScreen({Key? key}) : super(key: key);
 
   @override
-  ConsumerState<AddNoteScreen> createState() => _AddNoteScreenState();
+  ConsumerState<AddTaskScreen> createState() => _AddTaskScreenState();
 }
 
-class _AddNoteScreenState extends ConsumerState<AddNoteScreen>
+class _AddTaskScreenState extends ConsumerState<AddTaskScreen>
     with SingleTickerProviderStateMixin {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _contentController = TextEditingController();
@@ -123,7 +123,6 @@ class _AddNoteScreenState extends ConsumerState<AddNoteScreen>
       return;
     }
 
-    // Get current user ID
     final userId = ref.read(authUserProvider).value?.id;
     if (userId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -147,21 +146,17 @@ class _AddNoteScreenState extends ConsumerState<AddNoteScreen>
     });
 
     try {
-      // Create new note with task date as ISO string
-      final newNote = Note(
+      final newNote = Task(
         id: '',
         title: title,
         content: content,
         ownerId: userId,
         isCompleted: _isCompleted,
-        // Use ISO 8601 format for database storage
         taskDate: _selectedDate.toIso8601String(),
       );
 
-      // Add note using provider
-      await ref.read(notesProvider.notifier).addNote(newNote);
+      await ref.read(taskProvider.notifier).addNote(newNote);
 
-      // Show success toast
       if (mounted) {
         Fluttertoast.showToast(
           msg: "Task added successfully",
@@ -174,7 +169,6 @@ class _AddNoteScreenState extends ConsumerState<AddNoteScreen>
         _isLoading = false;
       });
 
-      // Show error toast
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -195,7 +189,6 @@ class _AddNoteScreenState extends ConsumerState<AddNoteScreen>
 
   @override
   Widget build(BuildContext context) {
-    // Get theme and media query data
     final ThemeData theme = Theme.of(context);
     final MediaQueryData mediaQuery = MediaQuery.of(context);
     final size = mediaQuery.size;
@@ -203,12 +196,10 @@ class _AddNoteScreenState extends ConsumerState<AddNoteScreen>
     final height = size.height;
     final bool isDarkMode = theme.brightness == Brightness.dark;
 
-    // Calculate responsive values based on screen size
     final bool isSmallScreen = width < 360;
     final bool isTablet = width > 600;
     final bool isLargeScreen = width > 900;
 
-    // Calculate adaptive paddings and sizes
     final horizontalPadding = width *
         (isSmallScreen
             ? 0.03
@@ -219,12 +210,6 @@ class _AddNoteScreenState extends ConsumerState<AddNoteScreen>
     final largeVerticalSpacing = height * 0.025;
     final buttonHeight = height * (isSmallScreen ? 0.055 : 0.06);
 
-    // Responsive font sizes
-    final double titleFontSize = isSmallScreen
-        ? 14
-        : isTablet
-            ? 18
-            : 16;
     final double contentFontSize = isSmallScreen
         ? 14
         : isTablet
@@ -241,7 +226,6 @@ class _AddNoteScreenState extends ConsumerState<AddNoteScreen>
             ? 20
             : 18;
 
-    // Responsive image height
     final imageHeight = height *
         (isSmallScreen
             ? 0.2
@@ -249,10 +233,8 @@ class _AddNoteScreenState extends ConsumerState<AddNoteScreen>
                 ? 0.3
                 : 0.25);
 
-    // Format the selected date
     final formattedDate = DateFormat('MMM d, yyyy').format(_selectedDate);
 
-    // Create adaptive layout based on screen orientation
     final isLandscape = width > height;
     final contentWidget = SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
@@ -262,8 +244,6 @@ class _AddNoteScreenState extends ConsumerState<AddNoteScreen>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(height: verticalSpacing),
-
-            // Conditionally show image based on available space
             if (!isLandscape || isLargeScreen)
               Center(
                 child: Hero(
@@ -275,11 +255,8 @@ class _AddNoteScreenState extends ConsumerState<AddNoteScreen>
                   ),
                 ),
               ),
-
             if (!isLandscape || isLargeScreen)
               SizedBox(height: largeVerticalSpacing),
-
-            // Task Date Selection
             Text(
               "Task Date",
               style: GoogleFonts.montserrat(
@@ -344,8 +321,6 @@ class _AddNoteScreenState extends ConsumerState<AddNoteScreen>
               ),
             ),
             SizedBox(height: largeVerticalSpacing),
-
-            // Title field
             Text(
               "Title",
               style: GoogleFonts.montserrat(
@@ -392,8 +367,6 @@ class _AddNoteScreenState extends ConsumerState<AddNoteScreen>
               ),
             ),
             SizedBox(height: largeVerticalSpacing),
-
-            // Description field
             Text(
               "Description",
               style: GoogleFonts.montserrat(
@@ -441,8 +414,6 @@ class _AddNoteScreenState extends ConsumerState<AddNoteScreen>
               ),
             ),
             SizedBox(height: largeVerticalSpacing),
-
-            // Completed checkbox
             Container(
               decoration: BoxDecoration(
                 color:
@@ -514,8 +485,6 @@ class _AddNoteScreenState extends ConsumerState<AddNoteScreen>
               ),
             ),
             SizedBox(height: largeVerticalSpacing),
-
-            // Add button
             SizedBox(
               width: double.infinity,
               height: buttonHeight,
@@ -586,7 +555,6 @@ class _AddNoteScreenState extends ConsumerState<AddNoteScreen>
               child: isLandscape && isTablet
                   ? Row(
                       children: [
-                        // In landscape and tablet, show image on the left
                         if (isLargeScreen)
                           Expanded(
                             flex: 3,
@@ -601,7 +569,6 @@ class _AddNoteScreenState extends ConsumerState<AddNoteScreen>
                               ),
                             ),
                           ),
-                        // Form on the right side
                         Expanded(
                           flex: 7,
                           child: contentWidget,

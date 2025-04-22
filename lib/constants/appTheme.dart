@@ -3,7 +3,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:notes_app_solulab/constants/colors.dart';
 
 class AppThemes {
-  // Light Theme
   static ThemeData lightTheme = ThemeData(
     brightness: Brightness.light,
     primaryColor: mainColor,
@@ -80,7 +79,6 @@ class AppThemes {
     ),
   );
 
-  // Dark Theme
   static ThemeData darkTheme = ThemeData(
     brightness: Brightness.dark,
     primaryColor: mainColor,

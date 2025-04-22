@@ -5,9 +5,8 @@ class SupabaseClientHelper {
 
   static Future<void> initialize() async {
     await Supabase.initialize(
-      url: 'https://uvloarykudepicfstzau.supabase.co',
-      anonKey:
-          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV2bG9hcnlrdWRlcGljZnN0emF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUwODgxODksImV4cCI6MjA2MDY2NDE4OX0.ZdWBVoIzj2EtgZ2_YE7NzTlPg_0Y2HGc0n_OzjuN4-8',
+      url: '........ YOUR DATABASE URL ........',
+      anonKey: '........ YOUR ANON KEY ........',
     );
   }
 

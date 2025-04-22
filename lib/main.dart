@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:notes_app_solulab/autherntication/Login.dart';
+import 'package:notes_app_solulab/authentication/Login.dart';
 import 'package:notes_app_solulab/constants/appTheme.dart';
 import 'package:notes_app_solulab/core/supaBase_client.dart';
-import 'package:notes_app_solulab/provider/auth_provider.dart';
-import 'package:notes_app_solulab/screens/notes_list.dart';
+import 'package:notes_app_solulab/functions/auth_provider.dart';
+import 'package:notes_app_solulab/screens/task_list.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Theme Mode Provider with persistence
