@@ -5,7 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:todo_flutter_app/authentication/Login.dart';
 import 'package:todo_flutter_app/constants/colors.dart';
 import 'package:todo_flutter_app/functions/auth_provider.dart';
-import 'package:todo_flutter_app/screens/task_list.dart';
+import 'package:todo_flutter_app/screens/home/task_list.dart';
 
 class CreateAccountScreen extends ConsumerStatefulWidget {
   const CreateAccountScreen({Key? key}) : super(key: key);

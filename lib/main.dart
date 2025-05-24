@@ -4,7 +4,7 @@ import 'package:todo_flutter_app/authentication/Login.dart';
 import 'package:todo_flutter_app/constants/appTheme.dart';
 import 'package:todo_flutter_app/core/supaBase_client.dart';
 import 'package:todo_flutter_app/functions/auth_provider.dart';
-import 'package:todo_flutter_app/screens/task_list.dart';
+import 'package:todo_flutter_app/screens/home/task_list.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 final themeModeProvider =
