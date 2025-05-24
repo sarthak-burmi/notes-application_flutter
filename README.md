@@ -129,7 +129,7 @@ TodoHub is a feature-rich, modern todo management application built with Flutter
 
 ### 📥 Installation
 
-1.  bashgit clone [https://github.com/yourusername/todohub.gitcd todohub](https://github.com/sarthak-burmi/notes-application_flutter)
+1.  bashgit clone [https://github.com/sarthak-burmi/notes-application\_flutter](https://github.com/sarthak-burmi/notes-application_flutter)
     
 2.  bashflutter pub get
     
