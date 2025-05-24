@@ -79,8 +79,6 @@ TodoHub is a feature-rich, modern todo management application built with Flutter
 📱 Screenshots
 --------------
 
-</p><p class="slate-paragraph"> .screenshots-grid {</p><p class="slate-paragraph"> display: grid;</p><p class="slate-paragraph"> grid-template-columns: repeat(3, 180px);</p><p class="slate-paragraph"> gap: 16px;</p><p class="slate-paragraph"> justify-content: center;</p><p class="slate-paragraph"> margin-top: 20px;</p><p class="slate-paragraph"> }</p><p class="slate-paragraph"> .screenshots-grid img {</p><p class="slate-paragraph"> width: 180px;</p><p class="slate-paragraph"> border-radius: 8px;</p><p class="slate-paragraph"> box-shadow: 0 2px 8px rgba(0,0,0,0.15);</p><p class="slate-paragraph"> object-fit: cover;</p><p class="slate-paragraph"> }</p><p class="slate-paragraph"> .screenshots-grid > .empty {</p><p class="slate-paragraph"> visibility: hidden;</p><p class="slate-paragraph"> }</p><p class="slate-paragraph">
-
 ![Login Screen](screenshots/login.png)
 
 ![Register Screen](screenshots/register.png)
@@ -131,7 +129,7 @@ TodoHub is a feature-rich, modern todo management application built with Flutter
 
 ### 📥 Installation
 
-1.  bashgit clone https://github.com/yourusername/todohub.gitcd todohub
+1.  bashgit clone [https://github.com/yourusername/todohub.gitcd todohub](https://github.com/sarthak-burmi/notes-application_flutter)
     
 2.  bashflutter pub get
     
